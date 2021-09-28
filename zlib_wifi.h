@@ -12,10 +12,13 @@
 #endif
 
 //WIFI状态指示灯定义
-#define GPIO_WIFI_LED_IO_MUX     PERIPHS_IO_MUX_MTDI_U
-#define GPIO_WIFI_LED_IO_NUM     12
-#define GPIO_WIFI_LED_IO_FUNC    FUNC_GPIO12
+//#define ZLIB_WIFI_STATE_LED_IO_MUX     PERIPHS_IO_MUX_MTDI_U
+//#define ZLIB_WIFI_STATE_LED_IO_NUM     12
+//#define ZLIB_WIFI_STATE_LED_IO_FUNC    FUNC_GPIO12
 
+#ifndef ZLIB_WIFI_CONNECTED_STATE_LED
+#define ZLIB_WIFI_CONNECTED_STATE_LED  (0)  //wifi连接后 wifi状态指示灯io口电平
+#endif
 
 //回调函数
 //is_repeat: true由定时器反复调用回调	falsewifi状态回调
@@ -36,6 +39,7 @@ typedef enum {
 
 extern void zlib_wifi_init(bool ap);
 extern void ICACHE_FLASH_ATTR zlib_wifi_AP(void);
+extern void ICACHE_FLASH_ATTR zlib_wifi_set_ssid(char *ssid, char * password);
 extern uint8_t * ICACHE_FLASH_ATTR zlib_wifi_get_mac(void);
 extern uint8_t * ICACHE_FLASH_ATTR zlib_wifi_get_mac_str(void);
 extern state_wifi_state_t ICACHE_FLASH_ATTR zlib_wifi_get_state(void);

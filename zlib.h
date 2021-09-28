@@ -12,6 +12,7 @@
 #include "zlib_wifi.h"
 #include "zlib_web_server.h"
 #include "zlib_web_wifi.h"
+#include "zlib_function.h"
 
 #ifndef DEVICE_NAME	//长度不可超过31
 	#define DEVICE_NAME "zControl_%s"
