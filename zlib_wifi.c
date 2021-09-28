@@ -12,15 +12,15 @@ struct _zlib_wifi_callback_t
     uint32_t repeat_time;
     zlib_wifi_callback_function wifi_cb;
 };
-//wifi×´Ì¬»Øµ÷º¯Êı
+//wifiçŠ¶æ€å›è°ƒå‡½æ•°
 static struct _zlib_wifi_callback_t _zlib_wifi_callback = { 0, NULL };
 
 #if (ZLIB_WIFI_MDSN_ENABLI)
-//mdns±ØĞëÔÚip»ñÈ¡ºó¹ıÒ»¶ÎÊ±¼äÔÙÆô¶¯!
+//mdnså¿…é¡»åœ¨ipè·å–åè¿‡ä¸€æ®µæ—¶é—´å†å¯åŠ¨!
 static os_timer_t _timer_mdns;
 static void _user_wifi_mdns_timer_fun(void *arg)
 {
-    //Æô¶¯mdns
+    //å¯åŠ¨mdns
     struct mdns_info info;
     char mdns_strName[32] = { 0 };
     char mdns_data_mac[32] = { 0 };
@@ -47,13 +47,13 @@ static void _user_wifi_mdns_timer_fun(void *arg)
 }
 #endif
 
-#if (ZLIB_WIFI_CALLBACK_REPEAT) //wifiÁ¬½Ó¹ı³ÌÖĞ ÊÇ·ñÖØ¸´µ÷ÓÃ»Øµ÷º¯Êı
+#if (ZLIB_WIFI_CALLBACK_REPEAT) //wifiè¿æ¥è¿‡ç¨‹ä¸­ æ˜¯å¦é‡å¤è°ƒç”¨å›è°ƒå‡½æ•°
 static os_timer_t _timer_cb_repeat;
 /**
- * º¯ Êı Ãû: _zlib_wifi_cb_repeat
- * º¯ÊıËµÃ÷: wifiÁ¬½Ó¹ı³Ì  ÊÇ·ñÖØ¸´µ÷ÓÃ»Øµ÷º¯Êı
- * ²Î    Êı: ÎŞ
- * ·µ    »Ø: ÎŞ
+ * å‡½ æ•° å: _zlib_wifi_cb_repeat
+ * å‡½æ•°è¯´æ˜: wifiè¿æ¥è¿‡ç¨‹  æ˜¯å¦é‡å¤è°ƒç”¨å›è°ƒå‡½æ•°
+ * å‚    æ•°: æ— 
+ * è¿”    å›: æ— 
  */
 static void _zlib_wifi_cb_repeat(void *arg)
 {
@@ -68,10 +68,10 @@ static void _zlib_wifi_cb_repeat(void *arg)
     }
 }
 /**
- * º¯ Êı Ãû: _zlib_wifi_cb_repeat_start
- * º¯ÊıËµÃ÷: Æô¶¯wifiÁ¬½Ó¹ı³Ì  ÊÇ·ñÖØ¸´µ÷ÓÃ»Øµ÷º¯ÊıµÄ¶¨Ê±Æ÷
- * ²Î    Êı: ÎŞ
- * ·µ    »Ø: ÎŞ
+ * å‡½ æ•° å: _zlib_wifi_cb_repeat_start
+ * å‡½æ•°è¯´æ˜: å¯åŠ¨wifiè¿æ¥è¿‡ç¨‹  æ˜¯å¦é‡å¤è°ƒç”¨å›è°ƒå‡½æ•°çš„å®šæ—¶å™¨
+ * å‚    æ•°: æ— 
+ * è¿”    å›: æ— 
  */
 static void _zlib_wifi_cb_repeat_start(void)
 {
@@ -84,10 +84,10 @@ static void _zlib_wifi_cb_repeat_start(void)
 }
 #endif
 /**
- * º¯ Êı Ãû: _zlib_wifi_handle_event_cb
- * º¯ÊıËµÃ÷: wifi×´Ì¬»Øµ÷º¯Êı
- * ²Î    Êı: System_Event_t *evt
- * ·µ    »Ø: ÎŞ
+ * å‡½ æ•° å: _zlib_wifi_handle_event_cb
+ * å‡½æ•°è¯´æ˜: wifiçŠ¶æ€å›è°ƒå‡½æ•°
+ * å‚    æ•°: System_Event_t *evt
+ * è¿”    å›: æ— 
  */
 static void _zlib_wifi_handle_event_cb(System_Event_t *evt)
 {
@@ -97,7 +97,7 @@ static void _zlib_wifi_handle_event_cb(System_Event_t *evt)
     {
         wifi_states = STATE_WIFI_STAMODE_DISCONNECTED;
 #if defined(GPIO_WIFI_LED_IO_MUX) && defined(GPIO_WIFI_LED_IO_NUM)&& defined(GPIO_WIFI_LED_IO_FUNC)
-        //Èô¶¨ÒåÁËwifiÖ¸Ê¾µÆ,Ôò³õÊ¼»¯µÆ
+        //è‹¥å®šä¹‰äº†wifiæŒ‡ç¤ºç¯,åˆ™åˆå§‹åŒ–ç¯
         wifi_status_led_install(GPIO_WIFI_LED_IO_NUM, GPIO_WIFI_LED_IO_MUX, GPIO_WIFI_LED_IO_FUNC);
 #endif
 #if (ZLIB_WIFI_CALLBACK_REPEAT)
@@ -146,61 +146,61 @@ static void _zlib_wifi_handle_event_cb(System_Event_t *evt)
     }
 }
 /**
- * º¯ Êı Ãû: zlib_wifi_init
- * º¯ÊıËµÃ÷: zlib¿â³õÊ¼»¯wifi
- * ²Î    Êı: bool ap:³õÊ¼»¯ÎªapÄ£Ê½,·ñÔòÎªstationÄ£Ê½,(ÈôÎŞssid±£´æÔòÊ¼ÖÕÎªapÄ£Ê½)
- * ·µ    »Ø: ÎŞ
+ * å‡½ æ•° å: zlib_wifi_init
+ * å‡½æ•°è¯´æ˜: zlibåº“åˆå§‹åŒ–wifi
+ * å‚    æ•°: bool ap:åˆå§‹åŒ–ä¸ºapæ¨¡å¼,å¦åˆ™ä¸ºstationæ¨¡å¼,(è‹¥æ— ssidä¿å­˜åˆ™å§‹ç»ˆä¸ºapæ¨¡å¼)
+ * è¿”    å›: æ— 
  */
 void ICACHE_FLASH_ATTR zlib_wifi_init(bool ap)
 {
     uint8_t i;
-    //ÉèÖÃÎªstationÄ£Ê½
+    //è®¾ç½®ä¸ºstationæ¨¡å¼
     wifi_set_opmode(STATION_MODE);
 
-    //ÉèÖÃ×Ô¶¯Á¬½ÓAP
+    //è®¾ç½®è‡ªåŠ¨è¿æ¥AP
     if (wifi_station_get_auto_connect() == 0)
     {
         wifi_station_set_auto_connect(1);
         LOGD("[ZLIB_WIFI]set default auto connect AP:true");
     }
 
-    //ÉèÖÃwifiÁ¬½Ó»Øµ÷º¯Êı
+    //è®¾ç½®wifiè¿æ¥å›è°ƒå‡½æ•°
     wifi_set_event_handler_cb(_zlib_wifi_handle_event_cb);
 
-    //»ñÈ¡mac
+    //è·å–mac
     wifi_get_macaddr(STATION_IF, hw_mac);
     os_sprintf(str_mac, "%02x%02x%02x%02x%02x%02x", MAC2STR(hw_mac));
-    LOGI("str_mac : %s \n", str_mac);
+    LOGI("[ZLIB_WIFI]str_mac : %s \n", str_mac);
 
-    //»ñÈ¡±£´æssidÊıÁ¿
+    //è·å–ä¿å­˜ssidæ•°é‡
     struct station_config config[5];
     i = wifi_station_get_ap_info(config);
     LOGD("[ZLIB_WIFI]wifi info : %d \n", i);
 
     if (!ap && i > 0)
     {
-        //wifi³õÊ¼»¯Íê³É,stationÄ£Ê½,ÏµÍ³³õÊ¼»¯Íê³ÉºóÁ¬½Ówifi
+        //wifiåˆå§‹åŒ–å®Œæˆ,stationæ¨¡å¼,ç³»ç»Ÿåˆå§‹åŒ–å®Œæˆåè¿æ¥wifi
         LOGI("[ZLIB_WIFI]user_wifi_Station\n");
     }
     else
     {
-        //wifi³õÊ¼»¯Íê³É,APÄ£Ê½
+        //wifiåˆå§‹åŒ–å®Œæˆ,APæ¨¡å¼
         zlib_wifi_AP();
     }
 
 #if defined(GPIO_WIFI_LED_IO_MUX) && defined(GPIO_WIFI_LED_IO_NUM)&& defined(GPIO_WIFI_LED_IO_FUNC)
-    //Èô¶¨ÒåÁËwifiÖ¸Ê¾µÆ,Ôò³õÊ¼»¯µÆ
+    //è‹¥å®šä¹‰äº†wifiæŒ‡ç¤ºç¯,åˆ™åˆå§‹åŒ–ç¯
     wifi_status_led_install(GPIO_WIFI_LED_IO_NUM, GPIO_WIFI_LED_IO_MUX, GPIO_WIFI_LED_IO_FUNC);
 #endif
 
 }
 
 /**
- * º¯ Êı Ãû: zlib_wifi_set_callback
- * º¯ÊıËµÃ÷  ÉèÖÃwifi×´Ì¬¸Ä±äÊ±»Øµ÷º¯Êı½Ó¿Ú
- * ²Î   Êı: __zlib_wifi_cb»Øµ÷º¯Êı½Ó¿Ú
- * uint32_t repeat_time:ÔÚwifiÁ¬½Ó¹ı³ÌÖĞ¶¨Ê±»Øµ÷¼ä¸ô,0Îª¹Ø±Õ.Ö§³Ö·¶Î§:¼ûos_timer_arm·¶Î§
- * ·µ   »Ø: ÎŞ
+ * å‡½ æ•° å: zlib_wifi_set_callback
+ * å‡½æ•°è¯´æ˜  è®¾ç½®wifiçŠ¶æ€æ”¹å˜æ—¶å›è°ƒå‡½æ•°æ¥å£
+ * å‚   æ•°: __zlib_wifi_cbå›è°ƒå‡½æ•°æ¥å£
+ * uint32_t repeat_time:åœ¨wifiè¿æ¥è¿‡ç¨‹ä¸­å®šæ—¶å›è°ƒé—´éš”,0ä¸ºå…³é—­.æ”¯æŒèŒƒå›´:è§os_timer_armèŒƒå›´
+ * è¿”   å›: æ— 
  */
 void ICACHE_FLASH_ATTR zlib_wifi_set_callback(zlib_wifi_callback_function _zlib_wifi_cb_fun, uint32_t repeat_time)
 {
@@ -217,23 +217,21 @@ void ICACHE_FLASH_ATTR zlib_wifi_set_callback(zlib_wifi_callback_function _zlib_
 #endif
 }
 /**
- * º¯ Êı Ãû: zlib_wifi_AP
- * º¯ÊıËµÃ÷  Æô¶¯apÄ£Ê½
- * ²Î   Êı: ÎŞ
- * ·µ   »Ø: ÎŞ
+ * å‡½ æ•° å: zlib_wifi_AP
+ * å‡½æ•°è¯´æ˜  å¯åŠ¨apæ¨¡å¼
+ * å‚   æ•°: æ— 
+ * è¿”   å›: æ— 
  */
 void ICACHE_FLASH_ATTR zlib_wifi_AP()
 {
-    char str[32] = { 0 };
-
     if (wifi_get_opmode() == STATIONAP_MODE) return;
 
-    //ÉèÖÃÎªapÄ£Ê½
+    //è®¾ç½®ä¸ºapæ¨¡å¼
     wifi_set_opmode_current(SOFTAP_MODE);
 
-    //ÉèÖÃAP²ÎÊı
+    //è®¾ç½®APå‚æ•°
     struct softap_config configAp;
-    os_sprintf(configAp.ssid, DEVICE_NAME, zlib_wifi_get_mac_str() + 8); //ÉèÖÃssid
+    os_sprintf(configAp.ssid, DEVICE_NAME, zlib_wifi_get_mac_str() + 8); //è®¾ç½®ssid
     configAp.ssid_len = os_strlen(configAp.ssid);
     configAp.channel = 5;
     configAp.authmode = AUTH_OPEN;
@@ -242,7 +240,7 @@ void ICACHE_FLASH_ATTR zlib_wifi_AP()
     configAp.beacon_interval = 100;
     wifi_softap_set_config(&configAp);
 
-    //ÉèÖÃipÏà¹ØÄÚÈİ
+    //è®¾ç½®ipç›¸å…³å†…å®¹
     struct ip_info info;
     wifi_softap_dhcps_stop();
     IP4_ADDR(&info.ip, 192, 168, 0, 1);
@@ -256,10 +254,10 @@ void ICACHE_FLASH_ATTR zlib_wifi_AP()
 }
 
 /**
- * º¯ Êı Ãû: zlib_wifi_get_mac/zlib_wifi_get_mac_str
- * º¯ÊıËµÃ÷  »ñÈ¡macµØÖ·
- * ²Î   Êı: ÎŞ
- * ·µ   »Ø: ÎŞ
+ * å‡½ æ•° å: zlib_wifi_get_mac/zlib_wifi_get_mac_str
+ * å‡½æ•°è¯´æ˜  è·å–macåœ°å€
+ * å‚   æ•°: æ— 
+ * è¿”   å›: æ— 
  */
 uint8_t * ICACHE_FLASH_ATTR zlib_wifi_get_mac(void)
 {

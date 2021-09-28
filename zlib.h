@@ -10,17 +10,19 @@
 #include "user_config.h"
 #include "espconn.h"
 #include "zlib_wifi.h"
+#include "zlib_web_server.h"
+#include "zlib_web_wifi.h"
 
-#ifndef DEVICE_NAME	//长度不可超过31
+#ifndef DEVICE_NAME	//闀垮害涓嶅彲瓒呰繃31
 	#define DEVICE_NAME "zControl_%s"
 #endif
 
-#if (1)	//调试输出相关
+#if (1)	//璋冭瘯杈撳嚭鐩稿叧
 //LOGD	0
 //LOGI	1
 //LOGW	2
 //LOGE	3
-#define DEBUG_LEVEL	0	//0显示全部log 4不输出任何log
+#define DEBUG_LEVEL	0	//0鏄剧ず鍏ㄩ儴log 4涓嶈緭鍑轰换浣昹og
 
 
 #if (DEBUG_LEVEL < 1)

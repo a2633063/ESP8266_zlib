@@ -4,21 +4,21 @@
 #include "user_interface.h"
 
 #ifndef ZLIB_WIFI_MDSN_ENABLI
-#define ZLIB_WIFI_MDSN_ENABLI  (0)  //ÊÇ·ñÆôÓÃmdns,Ä¬ÈÏ²»ÆôÓÃmdns
+#define ZLIB_WIFI_MDSN_ENABLI  (0)  //æ˜¯å¦å¯ç”¨mdns,é»˜è®¤ä¸å¯ç”¨mdns
 #endif
 
 #ifndef ZLIB_WIFI_CALLBACK_REPEAT
-#define ZLIB_WIFI_CALLBACK_REPEAT  (0)  //wifiÁ¬½Ó¹ı³ÌÖĞ ÊÇ·ñÖØ¸´µ÷ÓÃ»Øµ÷º¯Êı
+#define ZLIB_WIFI_CALLBACK_REPEAT  (0)  //wifiè¿æ¥è¿‡ç¨‹ä¸­ æ˜¯å¦é‡å¤è°ƒç”¨å›è°ƒå‡½æ•°
 #endif
 
-//WIFI×´Ì¬Ö¸Ê¾µÆ¶¨Òå
-//#define GPIO_WIFI_LED_IO_MUX     PERIPHS_IO_MUX_MTDI_U
-//#define GPIO_WIFI_LED_IO_NUM     12
-//#define GPIO_WIFI_LED_IO_FUNC    FUNC_GPIO12
+//WIFIçŠ¶æ€æŒ‡ç¤ºç¯å®šä¹‰
+#define GPIO_WIFI_LED_IO_MUX     PERIPHS_IO_MUX_MTDI_U
+#define GPIO_WIFI_LED_IO_NUM     12
+#define GPIO_WIFI_LED_IO_FUNC    FUNC_GPIO12
 
 
-//»Øµ÷º¯Êı
-//is_repeat: trueÓÉ¶¨Ê±Æ÷·´¸´µ÷ÓÃ»Øµ÷	falsewifi×´Ì¬»Øµ÷
+//å›è°ƒå‡½æ•°
+//is_repeat: trueç”±å®šæ—¶å™¨åå¤è°ƒç”¨å›è°ƒ	falsewifiçŠ¶æ€å›è°ƒ
 typedef void (*zlib_wifi_callback_function)(System_Event_t *evt, bool is_repeat);
 
 typedef enum {

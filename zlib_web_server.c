@@ -9,9 +9,21 @@
 #include "zlib.h"
 #include "zlib_web_server.h"
 
-URL_Http_Call_t *g_app_handlers;    //储存web相关信息
-uint8_t g_app_handlers_count = 0;
+static URL_Http_Call_t *_g_app_handlers;    //储存web相关信息
+uint8_t _g_app_handlers_count = 0;
 static const char * content_type_string[] = { "text/html", "application/json" };    //与ContentType顺序同步
+
+static int16_t ICACHE_FLASH_ATTR char2nibble(char c)
+{
+    if(c >= '0' && c <= '9')
+        return c - '0';
+    else if(c >= 'A' && c <= 'F')
+        return c - 'A' + 0xA;
+    else if(c >= 'a' && c <= 'f') return c - 'a' + 0xa;
+
+    return -1;
+}
+
 /**
  * 函  数  名: parse_url/save_data/save_data/check_data/data_send
  * 函数说明: http字符串处理解析
@@ -287,27 +299,27 @@ static void ICACHE_FLASH_ATTR _web_server_recv(void *arg, char *pusrdata, unsign
     LOGD("[ZLIB_WEB_SERVER]pPostdat: %s\n", pURL_Frame->pPostdat);
 
     //data_send(ptrespconn, true, pURL_Frame->contentType, pURL_Frame->pPostdat[0] == 0 ? NULL : pURL_Frame->pPostdat);
-    for (i = 0; i < g_app_handlers_count; i++)
+    for (i = 0; i < _g_app_handlers_count; i++)
     {
         //os_strlen(pURL_Frame->pUri)
-        if(os_strncmp(g_app_handlers[i].uri, pURL_Frame->pUri,
-                ((os_strlen(pURL_Frame->pUri) > os_strlen(g_app_handlers[i].uri)) ?
-                os_strlen(pURL_Frame->pUri) : os_strlen(g_app_handlers[i].uri))) == 0)
+        if(os_strncmp(_g_app_handlers[i].uri, pURL_Frame->pUri,
+                ((os_strlen(pURL_Frame->pUri) > os_strlen(_g_app_handlers[i].uri)) ?
+                os_strlen(pURL_Frame->pUri) : os_strlen(_g_app_handlers[i].uri))) == 0)
         {
             switch (pURL_Frame->Type)
             {
                 case GET:
-                    if(g_app_handlers[i].get_handler != NULL) g_app_handlers[i].get_handler(ptrespconn, pURL_Frame);
+                    if(_g_app_handlers[i].get_handler != NULL) _g_app_handlers[i].get_handler(ptrespconn, pURL_Frame);
                     break;
                 case POST:
-                    if(g_app_handlers[i].set_handler != NULL) g_app_handlers[i].set_handler(ptrespconn, pURL_Frame);
+                    if(_g_app_handlers[i].set_handler != NULL) _g_app_handlers[i].set_handler(ptrespconn, pURL_Frame);
                     break;
 
             }
             break;
         }
     }
-    if(i >= sizeof(g_app_handlers) / sizeof(struct http_uri_call))
+    if(i >= _g_app_handlers_count)
     {
         LOGW("[ZLIB_WEB_SERVER]no http web:%s\n", pURL_Frame->pUri);
         zlib_web_server_reply(ptrespconn, false, pURL_Frame->contentType, NULL);
@@ -325,13 +337,17 @@ static void ICACHE_FLASH_ATTR _web_server_recv(void *arg, char *pusrdata, unsign
  * 参        数: uint16_t port:web server监听的端口
  * 返        回: 无
  */
+
 void ICACHE_FLASH_ATTR zlib_web_server_init(uint16_t port, URL_Http_Call_t url_http_call[], uint8_t http_num)
 {
+    uint8_t i;
     static struct espconn esp_conn;
     static esp_tcp esptcp;
 
-    g_app_handlers = url_http_call;
-    g_app_handlers_count = http_num;
+    _g_app_handlers = url_http_call;
+    _g_app_handlers_count = http_num;
+
+
 
     esp_conn.type = ESPCONN_TCP;
     esp_conn.state = ESPCONN_NONE;
@@ -341,8 +357,12 @@ void ICACHE_FLASH_ATTR zlib_web_server_init(uint16_t port, URL_Http_Call_t url_h
     espconn_regist_recvcb(&esp_conn, _web_server_recv);
 
     espconn_accept(&esp_conn);
-    LOGI("[ZLIB_WEB_SERVER]web_server_init, port:%d\n", port);
+    LOGI("[ZLIB_WEB_SERVER]web_server_init[port:%d]:\n", port);
 
+    for(i=0;i<_g_app_handlers_count;i++)
+    {
+        LOGD("[ZLIB_WEB_SERVER] %d:%s\n",i,_g_app_handlers[i].uri);
+    }
 }
 
 /**
@@ -401,4 +421,136 @@ void ICACHE_FLASH_ATTR zlib_web_server_reply(void *arg, bool responseOK, enum Co
         os_free(pbuf);
         pbuf = NULL;
     }
+}
+
+/**
+ * 函  数  名: zlib_web_server_get_tag_val
+ * 函数说明: 从get/post数据中根据tag获取val
+ * 参        数:  pusrdata: get/post的数据
+ *          tag:    tag名称
+ *          value:  获取到的value
+ *          max_length: value字符串最大长度
+ * 返        回: >0:获取到value的长度     -1:失败     -2:pusrdata格式不符合get/post数据格式        -3:tag错误
+ */
+int16_t ICACHE_FLASH_ATTR zlib_web_server_get_tag_val(char * pusrdata, char *tag, char *value, uint16_t max_length)
+{
+    uint16_t count = 0;
+    int16_t c1, c2;
+    char *ptr;
+    const char *tag_p;
+
+    if(tag == NULL || *tag == '\0') return -3;   //未找到tag
+
+    ptr = pusrdata;
+    tag_p = tag;
+
+    while (1)
+    {   //查找tag
+        if(ptr == NULL || *ptr == '\0') return -1;   //未找到tag
+        if(*ptr == '&')
+        {
+            ptr++;
+            tag_p = tag;
+            continue;
+        }
+
+        if(*ptr == '=')
+        {
+            if(*tag_p == '\0')
+            {
+                //结果正确
+                break;
+            }
+            ptr = os_strstr(ptr, "&");    //查找下一组
+            tag_p = tag;
+            continue;
+        }
+
+        if(*ptr == '%')
+        {
+            ptr++;
+            c1 = char2nibble(*ptr);
+            ptr++;
+            c2 = char2nibble(*ptr);
+
+            if(c1 == -1 || c2 == -1)
+            {
+                LOGE("[ZLIB_WEB_SERVER]Invalid URL-encoded string!(tag)\n");
+                return -2;
+            }
+
+            if(*tag_p != (c1 << 4 | c2))
+            {
+                ptr = os_strstr(ptr, "&");    //查找下一组
+                tag_p = tag;
+                continue;
+            }
+            else
+            {
+                ptr++;
+                tag_p++;    //此字符正确 对比下一个字符
+                continue;
+            }
+        }
+        else
+        {
+            if(*tag_p == *ptr)
+            {
+                ptr++;
+                tag_p++;    //此字符正确 对比下一个字符
+                continue;
+            }
+            else
+            {
+                ptr = os_strstr(ptr, "&");    //查找下一组
+                tag_p = tag;
+                continue;
+            }
+        }
+    }
+
+    //已经找到结果
+    ptr++;
+    //此时ptr为value所在指针
+    while (1)
+    {
+        if(count >= max_length)
+        {    //已达到最大长度
+            return count;
+        }
+
+        if(*ptr == '&' || *ptr == '\0')
+        {    //已经获取完成
+            *(value + count) = '\0';
+            return count;
+        }
+
+        if(*ptr == '%')
+        {
+            ptr++;
+            c1 = char2nibble(*ptr);
+            ptr++;
+            c2 = char2nibble(*ptr);
+
+            if(c1 == -1 || c2 == -1)
+            {
+                LOGE("[ZLIB_WEB_SERVER]Invalid URL-encoded string!(value)\n");
+                return -2;
+            }
+
+            *(value + count) = (c1 << 4 | c2);
+            count++;
+            ptr++;
+            continue;
+        }
+        else
+        {
+            *(value + count) = *ptr;
+            count++;
+            ptr++;
+            continue;
+        }
+
+    }
+
 }
