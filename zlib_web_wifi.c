@@ -70,10 +70,10 @@ int ICACHE_FLASH_ATTR zlib_web_wifi_send_result_page(void *arg, URL_Frame *purl_
     zlib_web_server_reply(ptrespconn, true, TEXT_HTML, (char *)web_wifisuccess_html);
 
     //连接wifi
-    zlib_wifi_set_ssid(ssid, password);
+    zlib_wifi_set_ssid_delay(ssid, password,1000);
 //    wifi_station_disconnect();//不可直接连接 需要延时回复后才可以连接
 //    wifi_station_connect();
-    zlib_reboot_delay(1000);
+    zlib_reboot_delay(2000);
     return 0;
     Error: zlib_web_server_reply(ptrespconn, true, TEXT_HTML,(char *) web_wififail_html);
     return -1;

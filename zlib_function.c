@@ -1,12 +1,23 @@
 #include "zlib.h"
 #include "zlib_function.h"
+#include "zlib_ota.h"
+#include "upgrade.h"
 
 //延时重启,一定时间后重启设备
 static os_timer_t _timer_reboot;
 static void _reboot_timer_fun(void *arg)
 {
-    LOGE("[ZLIB_FUNCTION]System Reboot!\n\n");
-    system_restart();
+
+    if(system_upgrade_flag_check() == UPGRADE_FLAG_FINISH)
+    {
+        LOGE("[ZLIB_FUNCTION]System Reboot for ota!\n\n");
+        system_upgrade_reboot();
+    }
+    else
+    {
+        LOGE("[ZLIB_FUNCTION]System Reboot!\n\n");
+        system_restart();
+    }
 }
 void ICACHE_FLASH_ATTR zlib_reboot_delay(int32_t time_out)
 {
@@ -31,20 +42,23 @@ user_wifi_send(void *arg, Wifi_Comm_type_t type, uint8_t *s, char retained)
 
     switch (type)
     {
+        case WIFI_COMM_TYPE_MQTT:
+        {
+            break;
+        }
         case WIFI_COMM_TYPE_UDP:
         {
+            zlib_udp_reply(arg, s);
             break;
         }
         case WIFI_COMM_TYPE_TCP:
         {
+            zlib_tcp_reply(arg, s);
             break;
         }
         case WIFI_COMM_TYPE_HTTP:
         {
-            break;
-        }
-        case WIFI_COMM_TYPE_MQTT:
-        {
+            zlib_web_server_reply(arg, true, APPLICATIOIN_JSON, s);
             break;
         }
     }

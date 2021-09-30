@@ -71,7 +71,15 @@ void ICACHE_FLASH_ATTR zlib_udp_set_received_callback(zlib_udp_received_callback
  */
 void ICACHE_FLASH_ATTR zlib_udp_reply(void *arg, char *psend)
 {
-    struct espconn *pesp_conn = arg;
+    struct espconn *pesp_conn;
+    if(arg == NULL)
+    {
+        pesp_conn = &_ptrespconn;
+    }
+    else
+    {
+        pesp_conn = arg;
+    }
 //    LOGD("[ZLIB_UDP]udp reply:ip:%d.%d.%d.%d:%d\n",pesp_conn->proto.udp->remote_ip[0]
 //            ,pesp_conn->proto.udp->remote_ip[1]
 //            ,pesp_conn->proto.udp->remote_ip[2]

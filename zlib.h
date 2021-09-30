@@ -17,6 +17,7 @@
 #include "zlib_function.h"
 #include "zlib_udp.h"
 #include "zlib_tcp.h"
+#include "zlib_ota.h"
 
 
 #ifndef DEVICE_NAME	//长度不可超过31

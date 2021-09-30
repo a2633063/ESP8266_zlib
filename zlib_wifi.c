@@ -92,6 +92,28 @@ static void _zlib_wifi_cb_repeat_start(void)
     }
 }
 #endif
+
+static os_timer_t _timer_wifi_delay;
+/**
+ * 函  数  名: _wifi_mdns_timer_fun
+ * 函数说明: wifi连接获取ip 1秒后定时器调用此函数启动mdns
+ * 参        数: 无
+ * 返        回: 无
+ */
+
+static void _wifi_config_delay_timer_fun(void *arg)
+{
+    struct station_config *config = (struct station_config *) arg;
+    wifi_set_opmode_current(STATION_MODE);
+    bool b = wifi_station_set_config(config);
+    if(!b)
+    {
+        LOGE("[ZLIB_WIFI]wifi_station_set_config fail!\n");
+    }
+    else
+        LOGE("[ZLIB_WIFI]wifi_station_set_config success!\n");
+}
+
 /**
  * 函 数 名: _zlib_wifi_handle_event_cb
  * 函数说明: wifi状态回调函数
@@ -109,7 +131,7 @@ static void _zlib_wifi_handle_event_cb(System_Event_t *evt)
             //若定义了wifi指示灯,则初始化灯
             wifi_status_led_uninstall();
             wifi_status_led_install(ZLIB_WIFI_STATE_LED_IO_NUM, ZLIB_WIFI_STATE_LED_IO_MUX,
-                    ZLIB_WIFI_STATE_LED_IO_FUNC);
+            ZLIB_WIFI_STATE_LED_IO_FUNC);
 #endif
 #if (ZLIB_WIFI_CALLBACK_REPEAT)
             _zlib_wifi_cb_repeat_start();
@@ -268,22 +290,37 @@ void ICACHE_FLASH_ATTR zlib_wifi_AP()
 }
 /**
  * 函  数  名: zlib_wifi_set_ssid
- * 函数说明: 设置wifi连接的ssid及密码
+ * 函数说明: 设置wifi连接的ssid及密码,立即生效
  * 参        数:
  * 返        回: 无
  */
 void ICACHE_FLASH_ATTR zlib_wifi_set_ssid(char *ssid, char * password)
 {
-    struct station_config config;
-    wifi_set_opmode_current(STATION_MODE);
+    zlib_wifi_set_ssid_delay(ssid,password,0);
+}
+/**
+ * 函  数  名: zlib_wifi_set_ssid_delay
+ * 函数说明: 设置wifi连接的ssid及密码,延时一段时间后生效
+ * 参        数:
+ * 返        回: 无
+ */
+void ICACHE_FLASH_ATTR zlib_wifi_set_ssid_delay(char *ssid, char * password, uint16_t time_out)
+{
+    static struct station_config config;
     os_memset(&config, 0, sizeof(struct station_config));
     LOGI("[ZLIB_WIFI]set ssid:%s    pwd:%s\n", ssid, password);
     os_memcpy(&config.ssid, ssid, 32);
     os_memcpy(&config.password, password, 64);
-    bool b = wifi_station_set_config(&config);
-    if(!b)
+
+    if(time_out < 5)
     {
-        LOGE("[ZLIB_WIFI]wifi_station_set_config fail!\n");
+        _wifi_config_delay_timer_fun((void *) &config);
+    }
+    else
+    {
+        os_timer_disarm(&_timer_wifi_delay);
+        os_timer_setfn(&_timer_wifi_delay, (os_timer_func_t *) _wifi_config_delay_timer_fun, (void *) &config);
+        os_timer_arm(&_timer_wifi_delay, time_out, false);
     }
 }
 /**
