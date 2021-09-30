@@ -31,7 +31,7 @@ void ICACHE_FLASH_ATTR _udp_con_received(void *arg, char *pusrdata, unsigned sho
         bool b = _udp_received(arg, pusrdata, length);
         if(!b) return;
     }
-    zlib_json_deal(arg, WIFI_COMM_TYPE_UDP, pusrdata);
+    zlib_json_deal(arg, WIFI_COMM_TYPE_UDP, pusrdata, NULL);
 }
 /**
  * 函 数 名: zlib_udp_init

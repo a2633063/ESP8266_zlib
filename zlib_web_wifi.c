@@ -20,7 +20,7 @@
 int ICACHE_FLASH_ATTR zlib_web_wifi_send_wifisetting_page(void *arg, URL_Frame *purl_frame)
 {
     struct espconn *ptrespconn = arg;
-    zlib_web_server_reply(ptrespconn, true, TEXT_HTML, (char *)web_wifisetting_html);
+    zlib_web_server_reply(ptrespconn, true, TEXT_HTML, (char *) web_wifisetting_html);
     return 0;
 }
 /**
@@ -33,7 +33,7 @@ int ICACHE_FLASH_ATTR zlib_web_wifi_json(void *arg, URL_Frame *purl_frame)
 {
     struct espconn *ptrespconn = arg;
     //zlib_web_server_reply(ptrespconn, true, APPLICATIOIN_JSON, (char *)web_wifisetting_html);
-    zlib_json_deal(arg,WIFI_COMM_TYPE_HTTP,purl_frame->pPostdat);
+    zlib_json_deal(arg, WIFI_COMM_TYPE_HTTP, purl_frame->pPostdat, purl_frame->pGetdat);
     return 0;
 }
 /**
@@ -67,23 +67,21 @@ int ICACHE_FLASH_ATTR zlib_web_wifi_send_result_page(void *arg, URL_Frame *purl_
     length = zlib_web_server_get_tag_val(purl_frame->pPostdat, "PASS", password, 64);
     LOGI("[ZLIB_WEB_WIFI]password[%d]:%s\n", length, password);
     if(os_strlen(password) > 0 && os_strlen(password) < 8) goto Error;
-    zlib_web_server_reply(ptrespconn, true, TEXT_HTML, (char *)web_wifisuccess_html);
+    zlib_web_server_reply(ptrespconn, true, TEXT_HTML, (char *) web_wifisuccess_html);
 
     //连接wifi
-    zlib_wifi_set_ssid_delay(ssid, password,1000);
+    zlib_wifi_set_ssid_delay(ssid, password, 1000);
 //    wifi_station_disconnect();//不可直接连接 需要延时回复后才可以连接
 //    wifi_station_connect();
     zlib_reboot_delay(2000);
     return 0;
-    Error: zlib_web_server_reply(ptrespconn, true, TEXT_HTML,(char *) web_wififail_html);
+    Error: zlib_web_server_reply(ptrespconn, true, TEXT_HTML, (char *) web_wififail_html);
     return -1;
 }
 
-
 #if (ZLIB_WEB_WIFI_ONLY)
 static URL_Http_Call_t g_app_handlers[] = {
-        ZLIB_WEB_WIFI_HTTP
-};
+ZLIB_WEB_WIFI_HTTP };
 /**
  * 函  数  名: zlib_web_wifi_init
  * 函数说明: web服务仅web配网功能时调用
@@ -92,7 +90,7 @@ static URL_Http_Call_t g_app_handlers[] = {
  */
 void ICACHE_FLASH_ATTR zlib_web_wifi_init(void)
 {
-    zlib_web_server_init(80,g_app_handlers,sizeof(g_app_handlers) / sizeof(URL_Http_Call_t));
+    zlib_web_server_init(80, g_app_handlers, sizeof(g_app_handlers) / sizeof(URL_Http_Call_t));
     LOGI("[ZLIB_WEB_WIFI]web for wifi config Init!\n");
 }
 #endif

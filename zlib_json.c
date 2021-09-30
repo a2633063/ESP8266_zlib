@@ -30,19 +30,23 @@ void ICACHE_FLASH_ATTR zlib_json_init(zlib_json_deal_callback_function cb)
 }
 
 /**
- * 函 数 名: zlib_json_deal
+ * 函  数  名: zlib_json_deal
  * 函数说明: 处理json数据,供tcp/udp/mqtt/http调用
- * 参    数: type:调用此函数的通信接口库类型	jsonRoot:需要处理的json字符串
- * 返    回: 无
+ * 参        数: arg:通信相关指针
+ *          type:通信类型
+ *          jsonStr:需要处理的json字符串
+ *          p:通信附带的其他数据   mqtt:topic字符串     http:get数据(可能为空字符串)
+ * 返        回: 无
  */
-void ICACHE_FLASH_ATTR zlib_json_deal(void *arg, Wifi_Comm_type_t type, char* jsonRoot)
+void ICACHE_FLASH_ATTR zlib_json_deal(void *arg, Wifi_Comm_type_t type, char* jsonStr, void *p)
 {
-    if(jsonRoot == NULL) return;
-    if(os_strlen(jsonRoot) < 2) return;
+    if(jsonStr == NULL) return;
+    if(os_strlen(jsonStr) < 2) return;
 
-    cJSON *pJsonRoot = cJSON_Parse(jsonRoot);
+    cJSON *pJsonRoot = cJSON_Parse(jsonStr);
     if(pJsonRoot == NULL) return;
 
-    if(_json_deal != NULL) _json_deal(arg, type, pJsonRoot);
+    //todo 增加"cmd":"device report"处理
+    if(_json_deal != NULL) _json_deal(arg, type, pJsonRoot,p);
     cJSON_Delete(pJsonRoot);
 }

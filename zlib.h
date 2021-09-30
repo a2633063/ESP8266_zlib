@@ -18,6 +18,7 @@
 #include "zlib_udp.h"
 #include "zlib_tcp.h"
 #include "zlib_ota.h"
+#include "zlib_mqtt.h"
 
 
 #ifndef DEVICE_NAME	//长度不可超过31
