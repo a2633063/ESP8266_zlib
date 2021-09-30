@@ -22,7 +22,8 @@
 #define ZLIB_WEB_WIFI_HTTP \
  { "/", zlib_web_wifi_send_wifisetting_page, NULL, NULL, NULL }, \
  { "/result.htm", NULL,zlib_web_wifi_send_result_page, NULL, NULL },  \
- { "/setting.htm", zlib_web_wifi_send_wifisetting_page, NULL, NULL, NULL }
+ { "/json.html", NULL, zlib_web_wifi_json, NULL, NULL }
+// { "/setting.htm", zlib_web_wifi_send_wifisetting_page, NULL, NULL, NULL }, \
 
 
 #if (ZLIB_WEB_WIFI_ONLY)

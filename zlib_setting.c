@@ -4,6 +4,7 @@
 #include "mem.h"
 #include "user_interface.h"
 
+#include "zlib.h"
 #include "user_config.h"
 #include "zlib_setting.h"
 

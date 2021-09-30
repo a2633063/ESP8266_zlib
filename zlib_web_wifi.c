@@ -11,7 +11,6 @@
 #include "zlib_web_wifi.h"
 #include "zlib_function.h"
 
-
 /**
  * 函  数  名: zlib_web_wifi_send_wifisetting_page
  * 函数说明: web配网功能 http回调反馈函数
@@ -22,6 +21,19 @@ int ICACHE_FLASH_ATTR zlib_web_wifi_send_wifisetting_page(void *arg, URL_Frame *
 {
     struct espconn *ptrespconn = arg;
     zlib_web_server_reply(ptrespconn, true, TEXT_HTML, (char *)web_wifisetting_html);
+    return 0;
+}
+/**
+ * 函  数  名: zlib_web_wifi_json
+ * 函数说明: web http回复json
+ * 参        数:
+ * 返        回: 无
+ */
+int ICACHE_FLASH_ATTR zlib_web_wifi_json(void *arg, URL_Frame *purl_frame)
+{
+    struct espconn *ptrespconn = arg;
+    //zlib_web_server_reply(ptrespconn, true, APPLICATIOIN_JSON, (char *)web_wifisetting_html);
+    zlib_json_deal(arg,WIFI_COMM_TYPE_HTTP,purl_frame->pPostdat);
     return 0;
 }
 /**

@@ -16,7 +16,7 @@
 
 #define URL_MAX_LENGTH 64
 #define URL_GET_DAT_MAX_LENGTH 256
-#define URL_POST_DAT_MAX_LENGTH 512
+#define URL_POST_DAT_MAX_LENGTH 1024
 #define URLSize 10
 
 typedef enum ProtocolType
