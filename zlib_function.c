@@ -36,24 +36,24 @@ void ICACHE_FLASH_ATTR zlib_reboot_delay(int32_t time_out)
 }
 
 //根据通信内容,回复/发送数据
-void ICACHE_FLASH_ATTR
-user_wifi_send(void *arg, Wifi_Comm_type_t type, uint8_t *s, char retained)
+void ICACHE_FLASH_ATTR user_wifi_send(void *arg, Wifi_Comm_type_t type, void *s, char retained)
 {
 
     switch (type)
     {
         case WIFI_COMM_TYPE_MQTT:
         {
+
             break;
         }
         case WIFI_COMM_TYPE_UDP:
         {
-            zlib_udp_reply(arg, s);
+            zlib_udp_reply(arg, (char *)s);
             break;
         }
         case WIFI_COMM_TYPE_TCP:
         {
-            zlib_tcp_reply(arg, s);
+            zlib_tcp_reply(arg, (char *)s);
             break;
         }
         case WIFI_COMM_TYPE_HTTP:
@@ -62,12 +62,4 @@ user_wifi_send(void *arg, Wifi_Comm_type_t type, uint8_t *s, char retained)
             break;
         }
     }
-//    if(udp_flag || !user_mqtt_is_connect())
-//    {
-//        user_udp_send(s);
-//    }
-//    else
-//    {
-//        user_mqtt_send(s, 1, retained);
-//    }
 }

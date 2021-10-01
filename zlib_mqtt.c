@@ -10,20 +10,87 @@
 #include "zlib_tcp.h"
 #include "zlib_function.h"
 #include "mqtt.h"
+#include "zlib_mqtt.h"
+
+static os_timer_t timer_mqtt;
 
 static MQTT_Client mqttClient;
 static zlib_mqtt_topic_info_t *_mqtt_topic = NULL;
-static uint8_t _mqtt_topic_num=0;
+static uint8_t _mqtt_topic_num = 0;
+static zlib_mqtt_message_info_t *_mqtt_online_message = NULL;
+static uint8_t _mqtt_online_message_num = 0;
 static bool _mqtt_is_connected = false;
 
 static zlib_mqtt_received_callback_function _mqtt_received = NULL;
+
+/**
+ * 函 数 名: _mqtt_timer_func
+ * 函数说明: mqtt定时器回调函数.用户在wifi连接成功后连接mqtt.
+ *        在mqtt连接成功后订阅主题,在mqtt连接成功后发送设备上线信息.在心跳包超时时间后发送更新上线信息
+ * 参    数:
+ * 返    回: 无
+ */
+static void ICACHE_FLASH_ATTR _mqtt_timer_func(void *arg)
+{
+    static uint16_t status = 0;
+    MQTT_Client* client = (MQTT_Client*) arg;
+    uint8_t i;
+    switch (status)
+    {
+        case 0:
+        {   //等待wifi连接
+            if(wifi_get_opmode() != STATION_MODE) return;
+            if(zlib_wifi_get_state() != STATE_WIFI_STAMODE_GOT_IP) return;
+            zlib_mqtt_connect();
+            status++;
+            break;
+        }
+        case 1:
+        {
+            if(zlib_mqtt_is_connected() == false) return;
+            LOGI("[ZLIB_MQTT]mqtt connected!\n");
+            status++;
+            break;
+        }
+        case 2:
+        case 3:
+        {
+            if(_mqtt_online_message != NULL)
+            {
+                for (i = 0; i < _mqtt_online_message_num; i++)
+                {
+                    bool b = zlib_mqtt_send_message(_mqtt_online_message[i].topic, _mqtt_online_message[i].message,
+                            _mqtt_online_message[i].qos, _mqtt_online_message[i].retain);
+
+                    LOGI("[ZLIB_MQTT]send online message to mqtt[%s]:%s\n", _mqtt_online_message[i].topic,
+                            _mqtt_online_message[i].message);
+                }
+                //if(!b) status = 0;
+                status++;
+                os_timer_disarm(&timer_mqtt);
+                if(status == 3)
+                {
+                    os_timer_setfn(&timer_mqtt, (os_timer_func_t *) _mqtt_timer_func, arg);
+                    os_timer_arm(&timer_mqtt, client->connect_info.keepalive * 1750, true);
+                }
+            }
+            else
+            {
+                os_timer_disarm(&timer_mqtt);
+                //os_timer_setfn(&timer_mqtt, (os_timer_func_t *) _mqtt_timer_func, arg);
+                //os_timer_arm(&timer_mqtt, 1000, true);
+            }
+            break;
+        }
+    }
+}
 /**
  * 函 数 名: _mqtt_con_received
  * 函数说明: mqtt接收数据回调函数
  * 参    数: 
  * 返    回: 无
  */
-void ICACHE_FLASH_ATTR _mqtt_con_received(uint32_t *arg, const char* topic, uint32_t topic_len, const char *data,
+static void ICACHE_FLASH_ATTR _mqtt_con_received(uint32_t *arg, const char* topic, uint32_t topic_len, const char *data,
         uint32_t data_len)
 {
     MQTT_Client* client = (MQTT_Client*) arg;
@@ -31,6 +98,12 @@ void ICACHE_FLASH_ATTR _mqtt_con_received(uint32_t *arg, const char* topic, uint
     char *topicBuf = (char*) os_zalloc(topic_len + 1);
     char *dataBuf = (char*) os_zalloc(data_len + 1);
 
+    if(topicBuf == NULL || dataBuf == NULL)
+    {
+        LOGE("[ZLIB_MQTT]memory error!\n");
+        LOGE("[ZLIB_MQTT]MQTT message lost:[%s][ZLIB_MQTT]     \n[%s]\n", topic, data);
+        return;
+    }
     os_memcpy(topicBuf, topic, topic_len);
     topicBuf[topic_len] = 0;
 
@@ -44,7 +117,7 @@ void ICACHE_FLASH_ATTR _mqtt_con_received(uint32_t *arg, const char* topic, uint
     }
     zlib_json_deal(arg, WIFI_COMM_TYPE_MQTT, dataBuf, (void *) topicBuf);
 }
-void _mqtt_connected_cb(uint32_t *args)
+static void _mqtt_connected_cb(uint32_t *args)
 {
     uint8_t i;
     MQTT_Client* client = (MQTT_Client*) args;
@@ -59,18 +132,17 @@ void _mqtt_connected_cb(uint32_t *args)
         }
     }
 
-//    os_timer_disarm(&timer_mqtt);
-//    os_timer_setfn(&timer_mqtt, (os_timer_func_t *) user_mqtt_timer_func, NULL);
-//    os_timer_arm(&timer_mqtt, MQTT_TIMER_REPEATTIME, 1);
     _mqtt_is_connected = true;
 
 }
-void _mqtt_disconnected_cb(uint32_t *args)
+static void _mqtt_disconnected_cb(uint32_t *args)
 {
     _mqtt_is_connected = false;
-//    os_timer_disarm(&timer_mqtt);
-    MQTT_Client* client = (MQTT_Client*) args;
+    //MQTT_Client* client = (MQTT_Client*) args;
     LOGE("[ZLIB_MQTT]mqtt disconnected\r\n");
+    os_timer_disarm(&timer_mqtt);
+    os_timer_setfn(&timer_mqtt, (os_timer_func_t *) _mqtt_timer_func, args);
+    os_timer_arm(&timer_mqtt, 1000, true);
 }
 /**
  * 函  数  名: zlib_mqtt_init
@@ -82,6 +154,10 @@ void _mqtt_disconnected_cb(uint32_t *args)
  */
 void ICACHE_FLASH_ATTR zlib_mqtt_init(char *host, uint16_t port, mqtt_connect_info_t *mqtt_info)
 {
+    if(host == NULL || mqtt_info == NULL || port == 0) return;
+    if(mqtt_info->client_id == NULL) return;
+    if(os_strlen(host) < 2) return;
+
     MQTT_InitConnection(&mqttClient, host, port, NO_TLS);
 
     MQTT_InitClient(&mqttClient, mqtt_info->client_id, mqtt_info->username, mqtt_info->password, mqtt_info->keepalive,
@@ -97,6 +173,9 @@ void ICACHE_FLASH_ATTR zlib_mqtt_init(char *host, uint16_t port, mqtt_connect_in
 //    MQTT_OnPublished(&mqttClient, mqttPublishedCb);
     MQTT_OnData(&mqttClient, _mqtt_con_received);
 
+    os_timer_disarm(&timer_mqtt);
+    os_timer_setfn(&timer_mqtt, (os_timer_func_t *) _mqtt_timer_func, &mqttClient);
+    os_timer_arm(&timer_mqtt, 1000, true);
     LOGI("[ZLIB_MQTT]mqtt init port:%d\n", port);
 }
 
@@ -119,7 +198,18 @@ void ICACHE_FLASH_ATTR zlib_mqtt_set_received_callback(zlib_mqtt_received_callba
 void ICACHE_FLASH_ATTR zlib_mqtt_subscribe(zlib_mqtt_topic_info_t *p, uint8_t count)
 {
     _mqtt_topic = p;
-    _mqtt_topic_num= count;
+    _mqtt_topic_num = count;
+}
+/**
+ * 函  数  名: zlib_mqtt_set_online_message
+ * 函数说明: 设置上线主题数据,在设备连上mqtt后立即发送,延时心跳时间后再发送一次
+ * 参        数: p:上线主题数据
+ * 返        回: 无
+ */
+void ICACHE_FLASH_ATTR zlib_mqtt_set_online_message(zlib_mqtt_message_info_t *p, uint8_t count)
+{
+    _mqtt_online_message_num = count;
+    _mqtt_online_message = p;
 }
 /**
  * 函  数  名: zlib_mqtt_reply
@@ -142,4 +232,29 @@ void ICACHE_FLASH_ATTR zlib_mqtt_reply(void *arg, char *psend)
 bool ICACHE_FLASH_ATTR zlib_mqtt_is_connected(void)
 {
     return _mqtt_is_connected;
+}
+/**
+ * 函  数  名: zlib_mqtt_connect/zlib_mqtt_disconnect
+ * 函数说明: 连接mqtt/断开mqtt
+ * 参        数: 无
+ * 返        回: 无
+ */
+void ICACHE_FLASH_ATTR zlib_mqtt_connect(void)
+{
+    MQTT_Connect(&mqttClient);
+}
+void ICACHE_FLASH_ATTR zlib_mqtt_disconnect(void)
+{
+    MQTT_Disconnect(&mqttClient);
+}
+
+/**
+ * 函  数  名: zlib_mqtt_send_message
+ * 函数说明: mqtt发送数据
+ * 参        数: topic,message,qos,retain
+ * 返        回: 无
+ */
+bool ICACHE_FLASH_ATTR zlib_mqtt_send_message(char *topic, char* message, int qos, int retain)
+{
+    return zlib_mqtt_is_connected ? MQTT_Publish(&mqttClient, topic, message, os_strlen(message), qos, retain) : false;
 }

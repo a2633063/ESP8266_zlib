@@ -9,13 +9,12 @@
 #include "user_interface.h"
 #include "user_config.h"
 #include "espconn.h"
-//#include "zlib.h"
+#include "zlib.h"
 #include "../cJson/cJSON.h"
 #include "zlib_wifi.h"
 #include "zlib_web_server.h"
 #include "zlib_web_wifi.h"
-#include "zlib_function.h"
-#include "zlib_udp.h"
+#include "zlib_setting.h"#include "zlib_udp.h"
 #include "zlib_tcp.h"
 #include "zlib_ota.h"
 #include "zlib_mqtt.h"
@@ -33,6 +32,7 @@ typedef enum {
     WIFI_COMM_TYPE__MAX
 } Wifi_Comm_type_t;
 
+#include "zlib_function.h"
 #include "zlib_json.h"
 #if (1)	//调试输出相关
 //LOGD	0

@@ -28,7 +28,8 @@ SpiFlashOpResult ICACHE_FLASH_ATTR zlib_setting_save_config(void *arg, uint32_t 
 
     EXIT:
     os_free(p);
-    if(r != SPI_FLASH_RESULT_OK) LOGE("[ZLIB_SETTING]save config fail! err:%d",r);
+    if(r != SPI_FLASH_RESULT_OK) LOGE("[ZLIB_SETTING]save config fail! err:%d\n",r);
+    else LOGI("[ZLIB_SETTING]save config success\n");
     return r;
 }
 
@@ -55,7 +56,8 @@ SpiFlashOpResult ICACHE_FLASH_ATTR zlib_setting_get_config(void *arg, uint32_t l
 
     EXIT:
     os_free(p);
-    if(r != SPI_FLASH_RESULT_OK) LOGE("[ZLIB_SETTING]get config fail! err:%d",r);
+    if(r != SPI_FLASH_RESULT_OK) LOGE("[ZLIB_SETTING]get config fail! err:%d\n",r);
+    else LOGI("[ZLIB_SETTING]get config success\n");
     return r;
 }
 
