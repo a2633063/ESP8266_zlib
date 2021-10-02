@@ -18,13 +18,26 @@
 SpiFlashOpResult ICACHE_FLASH_ATTR zlib_setting_save_config(void *arg, uint32_t length)
 {
     SpiFlashOpResult r;
+
+    uint8_t *temp_p = (uint8_t *) os_malloc(length);
+    if(zlib_setting_get_config(temp_p,length) == SPI_FLASH_RESULT_OK)
+    {
+        if(os_memcmp(arg,temp_p,length) == 0 )
+        {
+            LOGI("[ZLIB_SETTING]Same config.don't need to save\n");
+            return SPI_FLASH_RESULT_OK;
+        }
+    }
+
+
     uint32_t l = length;
     if(l % 4 != 0) l += 4 - l % 4;	// 4 字节对齐。
-    uint8_t *p = (uint8_t *) os_malloc(length);
-    os_memcpy(p, arg, l);
+    uint8_t *p = (uint8_t *) os_malloc(l);
+    os_memset(p, 0xff, l);
+    os_memcpy(p, arg, length);
     r = spi_flash_erase_sector(ZLIB_SETTING_SAVE_ADDR);
     if(r != SPI_FLASH_RESULT_OK) goto EXIT;
-    r = spi_flash_write(ZLIB_SETTING_SAVE_ADDR * 4096, (uint32 *) p, length);
+    r = spi_flash_write(ZLIB_SETTING_SAVE_ADDR * 4096, (uint32 *) p, l);
 
     EXIT:
     os_free(p);
@@ -47,11 +60,13 @@ SpiFlashOpResult ICACHE_FLASH_ATTR zlib_setting_get_config(void *arg, uint32_t l
 
     uint32_t l = length;
     if(l % 4 != 0) l += 4 - l % 4;	// 4 字节对齐。
-    uint8_t *p = (uint8_t *) os_malloc(l);
 
+    uint8_t *p = (uint8_t *) os_malloc(l);
     r = spi_flash_read(ZLIB_SETTING_SAVE_ADDR * 4096, (uint32 *) p, l);
 
     if(r != SPI_FLASH_RESULT_OK) goto EXIT;
+
+    os_memset(arg, 0xff, length);
     os_memcpy(arg, p, length);
 
     EXIT:

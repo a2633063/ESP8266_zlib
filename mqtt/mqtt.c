@@ -40,6 +40,7 @@
 #include "espconn.h"
 #include "os_type.h"
 #include "mem.h"
+#include "utils.h"
 
 #define MQTT_TASK_PRIO                2
 #define MQTT_TASK_QUEUE_SIZE        5
@@ -266,14 +267,14 @@ READPACKET:
 #ifdef MQTT_SSL_ENABLE
                         espconn_secure_disconnect(client->pCon);
 #else
-                        INFO("TCP:��֧��SSL\r\n");
+                        INFO("TCP: Do not support SSL\r\n");
 #endif
                     }
                     else {
                         espconn_disconnect(client->pCon);
                     }
                 } else {
-                    INFO("MQTT:���� %s:%d\r\n", client->host, client->port);
+                    INFO("MQTT:connect %s:%d\r\n", client->host, client->port);
                     client->connState = MQTT_DATA;
                     if (client->connectedCb)
                         client->connectedCb((uint32_t*)client);
@@ -457,7 +458,7 @@ mqtt_tcpclient_connect_cb(void *arg)
     espconn_regist_disconcb(client->pCon, mqtt_tcpclient_discon_cb);
     espconn_regist_recvcb(client->pCon, mqtt_tcpclient_recv);////////
     espconn_regist_sentcb(client->pCon, mqtt_tcpclient_sent_cb);///////
-    INFO("MQTT: ���ӷ�����: %s:%d\r\n", client->host, client->port);
+    INFO("MQTT: Connected to broker %s:%d\r\n", client->host, client->port);
 
     mqtt_msg_init(&client->mqtt_state.mqtt_connection, client->mqtt_state.out_buffer, client->mqtt_state.out_buffer_length);
     client->mqtt_state.outbound_message = mqtt_msg_connect(&client->mqtt_state.mqtt_connection, client->mqtt_state.connect_info);
@@ -651,7 +652,7 @@ MQTT_Task(os_event_t *e)
         }
         break;
     case TCP_DISCONNECTED:
-        INFO("MQTT: �Ͽ�����\r\n");
+        INFO("MQTT: disconnected\r\n");
         mqtt_tcpclient_delete(client);
         break;
     case MQTT_DELETED:
@@ -671,12 +672,12 @@ MQTT_Task(os_event_t *e)
 
 
             client->sendTimeout = MQTT_SEND_TIMOUT;
-            INFO("MQTT: ������.., type: %d, id: %04X\r\n", client->mqtt_state.pending_msg_type, client->mqtt_state.pending_msg_id);
+            INFO("MQTT: Sending.., type: %d, id: %04X\r\n", client->mqtt_state.pending_msg_type, client->mqtt_state.pending_msg_id);
             if (client->security) {
 #ifdef MQTT_SSL_ENABLE
                 espconn_secure_send(client->pCon, dataBuffer, dataLen);
 #else
-                INFO("TCP: ��֧��SSL\r\n");
+                INFO("TCP: Do not support SSL\r\n");
 #endif
             }
             else {

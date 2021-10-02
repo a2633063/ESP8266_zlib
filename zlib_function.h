@@ -8,6 +8,6 @@
 
 
 extern void zlib_reboot_delay(int32_t time_out);
-extern void user_wifi_send(void *arg, Wifi_Comm_type_t type, void *s, char retained);
+extern void zlib_fun_wifi_send(void *arg, Wifi_Comm_type_t type, char*topic, char *s, int qos, int retain);
 
 #endif

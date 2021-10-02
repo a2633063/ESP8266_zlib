@@ -43,5 +43,6 @@ extern void zlib_wifi_set_ssid(char *ssid, char * password);
 extern void zlib_wifi_set_ssid_delay(char *ssid, char * password, uint16_t time_out);
 extern uint8_t * zlib_wifi_get_mac(void);
 extern uint8_t * zlib_wifi_get_mac_str(void);
+extern uint8_t * ICACHE_FLASH_ATTR zlib_wifi_get_ip_str(void);
 extern state_wifi_state_t zlib_wifi_get_state(void);
 #endif

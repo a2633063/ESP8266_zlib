@@ -131,7 +131,7 @@ static void _zlib_wifi_handle_event_cb(System_Event_t *evt)
             //若定义了wifi指示灯,则初始化灯
             wifi_status_led_uninstall();
             wifi_status_led_install(ZLIB_WIFI_STATE_LED_IO_NUM, ZLIB_WIFI_STATE_LED_IO_MUX,
-            ZLIB_WIFI_STATE_LED_IO_FUNC);
+                    ZLIB_WIFI_STATE_LED_IO_FUNC);
 #endif
 #if (ZLIB_WIFI_CALLBACK_REPEAT)
             _zlib_wifi_cb_repeat_start();
@@ -147,6 +147,13 @@ static void _zlib_wifi_handle_event_cb(System_Event_t *evt)
 
             struct station_config wifi_config;
             wifi_station_get_config(&wifi_config);
+//            LOGD("[ZLIB_WIFI]ssid:%s\n", wifi_config.ssid);
+//            LOGD("[ZLIB_WIFI]bssid_set:%d\n", wifi_config.bssid_set);
+//            LOGD("[ZLIB_WIFI]bssid:"MACSTR"\n", MAC2STR(wifi_config.bssid));
+//            LOGD("[ZLIB_WIFI]rssi:%d\n", wifi_config.threshold.rssi);
+//            LOGD("[ZLIB_WIFI]authmode:%d\n", wifi_config.threshold.authmode);
+//            LOGD("[ZLIB_WIFI]all_channel_scan:%d\n", wifi_config.all_channel_scan);
+//            wifi_config.all_channel_scan = false;
             wifi_station_set_config(&wifi_config);
             os_sprintf(str_ip, IPSTR, IP2STR(&evt->event_info.got_ip.ip));
 
@@ -296,7 +303,7 @@ void ICACHE_FLASH_ATTR zlib_wifi_AP()
  */
 void ICACHE_FLASH_ATTR zlib_wifi_set_ssid(char *ssid, char * password)
 {
-    zlib_wifi_set_ssid_delay(ssid,password,0);
+    zlib_wifi_set_ssid_delay(ssid, password, 0);
 }
 /**
  * 函  数  名: zlib_wifi_set_ssid_delay
@@ -309,6 +316,7 @@ void ICACHE_FLASH_ATTR zlib_wifi_set_ssid_delay(char *ssid, char * password, uin
     static struct station_config config;
     os_memset(&config, 0, sizeof(struct station_config));
     LOGI("[ZLIB_WIFI]set ssid:%s    pwd:%s\n", ssid, password);
+    config.bssid_set=0;
     os_memcpy(&config.ssid, ssid, 32);
     os_memcpy(&config.password, password, 64);
 
@@ -336,6 +344,10 @@ uint8_t * ICACHE_FLASH_ATTR zlib_wifi_get_mac(void)
 uint8_t * ICACHE_FLASH_ATTR zlib_wifi_get_mac_str(void)
 {
     return str_mac;
+}
+uint8_t * ICACHE_FLASH_ATTR zlib_wifi_get_ip_str(void)
+{
+    return str_ip;
 }
 state_wifi_state_t ICACHE_FLASH_ATTR zlib_wifi_get_state(void)
 {

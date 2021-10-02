@@ -154,9 +154,12 @@ static void _mqtt_disconnected_cb(uint32_t *args)
  */
 void ICACHE_FLASH_ATTR zlib_mqtt_init(char *host, uint16_t port, mqtt_connect_info_t *mqtt_info)
 {
-    if(host == NULL || mqtt_info == NULL || port == 0) return;
-    if(mqtt_info->client_id == NULL) return;
-    if(os_strlen(host) < 2) return;
+
+    if((host == NULL || mqtt_info == NULL || port == 0) || (mqtt_info->client_id == NULL ) || (os_strlen(host) < 2))
+    {
+        LOGW("[ZLIB_MQTT]mqtt info error, mqtt deinit\n");
+        return;
+    }
 
     MQTT_InitConnection(&mqttClient, host, port, NO_TLS);
 
