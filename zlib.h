@@ -13,12 +13,13 @@
 #include "../cJson/cJSON.h"
 #include "zlib_wifi.h"
 #include "zlib_web_server.h"
-#include "zlib_web_wifi.h"
+#include "zlib_web_config.h"
 #include "zlib_setting.h"
 #include "zlib_udp.h"
 #include "zlib_tcp.h"
 #include "zlib_ota.h"
 #include "zlib_mqtt.h"
+#include "zlib_rtc.h"
 
 
 #ifndef DEVICE_NAME	//长度不可超过31
