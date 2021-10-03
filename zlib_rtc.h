@@ -9,6 +9,7 @@
 #include "user_interface.h"
 #include "user_config.h"
 #include "espconn.h"
+#include "sntp.h"
 #include "zlib.h"
 
 enum
@@ -48,14 +49,14 @@ typedef struct struct_time
 
 } struct_time_t;
 
-//回调函数,tcp接收到数据后先调用此回调函数
+//回调函数,每次秒钟变化时回调此函数
 //返回值: true: 继续执行json处理	false:不执行json处理
-typedef bool (*zlib_tcp_received_callback_function)(void *arg, char *pusrdata, unsigned short length);
+typedef void (*zlib_rtc_recall_callback_function)(const struct_time_t tm);
 
 extern void zlib_rtc_init();
-extern void zlib_rtc_set_received_callback(zlib_tcp_received_callback_function cb);
-extern void zlib_rtc_reply(void *arg, char *psend);
-
+extern void zlib_rtc_set_recall_callback(zlib_rtc_recall_callback_function cb);
 extern void zlib_rtc_get_time(uint64 current_stamp_temp, struct_time_t *time);
+extern void zlib_rtc_set_timezone(int8_t timezone);
+extern int8_t zlib_rtc_get_timezone(void);
 #endif
 

@@ -12,7 +12,7 @@
 #include "mqtt.h"
 #include "zlib_mqtt.h"
 
-static os_timer_t timer_mqtt;
+static os_timer_t _timer_mqtt;
 
 static MQTT_Client mqttClient;
 static zlib_mqtt_topic_info_t *_mqtt_topic = NULL;
@@ -67,18 +67,18 @@ static void ICACHE_FLASH_ATTR _mqtt_timer_func(void *arg)
                 }
                 //if(!b) status = 0;
                 status++;
-                os_timer_disarm(&timer_mqtt);
+                os_timer_disarm(&_timer_mqtt);
                 if(status == 3)
                 {
-                    os_timer_setfn(&timer_mqtt, (os_timer_func_t *) _mqtt_timer_func, arg);
-                    os_timer_arm(&timer_mqtt, client->connect_info.keepalive * 1750, true);
+                    os_timer_setfn(&_timer_mqtt, (os_timer_func_t *) _mqtt_timer_func, arg);
+                    os_timer_arm(&_timer_mqtt, client->connect_info.keepalive * 1750, true);
                 }
             }
             else
             {
-                os_timer_disarm(&timer_mqtt);
-                //os_timer_setfn(&timer_mqtt, (os_timer_func_t *) _mqtt_timer_func, arg);
-                //os_timer_arm(&timer_mqtt, 1000, true);
+                os_timer_disarm(&_timer_mqtt);
+                //os_timer_setfn(&_timer_mqtt, (os_timer_func_t *) _mqtt_timer_func, arg);
+                //os_timer_arm(&_timer_mqtt, 1000, true);
             }
             break;
         }
@@ -140,9 +140,9 @@ static void _mqtt_disconnected_cb(uint32_t *args)
     _mqtt_is_connected = false;
     //MQTT_Client* client = (MQTT_Client*) args;
     LOGE("[ZLIB_MQTT]mqtt disconnected\r\n");
-    os_timer_disarm(&timer_mqtt);
-    os_timer_setfn(&timer_mqtt, (os_timer_func_t *) _mqtt_timer_func, args);
-    os_timer_arm(&timer_mqtt, 1000, true);
+    os_timer_disarm(&_timer_mqtt);
+    os_timer_setfn(&_timer_mqtt, (os_timer_func_t *) _mqtt_timer_func, args);
+    os_timer_arm(&_timer_mqtt, 1000, true);
 }
 /**
  * 函  数  名: zlib_mqtt_init
@@ -176,10 +176,10 @@ void ICACHE_FLASH_ATTR zlib_mqtt_init(char *host, uint16_t port, mqtt_connect_in
 //    MQTT_OnPublished(&mqttClient, mqttPublishedCb);
     MQTT_OnData(&mqttClient, _mqtt_con_received);
 
-    os_timer_disarm(&timer_mqtt);
-    os_timer_setfn(&timer_mqtt, (os_timer_func_t *) _mqtt_timer_func, &mqttClient);
-    os_timer_arm(&timer_mqtt, 1000, true);
-    LOGI("[ZLIB_MQTT]mqtt init port:%d\n", port);
+    os_timer_disarm(&_timer_mqtt);
+    os_timer_setfn(&_timer_mqtt, (os_timer_func_t *) _mqtt_timer_func, &mqttClient);
+    os_timer_arm(&_timer_mqtt, 1000, true);
+    LOGI("[ZLIB_MQTT]mqtt init %d:%d\n", host,port);
 }
 
 /**
