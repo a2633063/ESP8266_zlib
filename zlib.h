@@ -19,7 +19,7 @@
 #include "zlib_tcp.h"
 #include "zlib_ota.h"
 #include "zlib_mqtt.h"
-#include "zlib_rtc.h"
+//#include "zlib_rtc.h"
 
 
 #ifndef DEVICE_NAME	//长度不可超过31

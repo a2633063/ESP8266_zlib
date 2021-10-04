@@ -10,7 +10,7 @@
 #include "user_config.h"
 #include "espconn.h"
 #include "sntp.h"
-#include "zlib.h"
+
 
 enum
 {

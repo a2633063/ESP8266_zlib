@@ -12,8 +12,7 @@
 #define MQTT_DEBUG_ON
 #endif
 #if defined(MQTT_DEBUG_ON)
-//#define INFO( format, ... ) os_printf( format, ## __VA_ARGS__ )
-#define INFO( format, ... )
+#define INFO( format, ... ) os_printf( format, ## __VA_ARGS__ )
 #else
 #define INFO( format, ... )
 #endif

@@ -347,8 +347,6 @@ void ICACHE_FLASH_ATTR zlib_web_server_init(uint16_t port, URL_Http_Call_t url_h
     _g_app_handlers = url_http_call;
     _g_app_handlers_count = http_num;
 
-
-
     esp_conn.type = ESPCONN_TCP;
     esp_conn.state = ESPCONN_NONE;
     esp_conn.proto.tcp = &esptcp;
@@ -359,9 +357,9 @@ void ICACHE_FLASH_ATTR zlib_web_server_init(uint16_t port, URL_Http_Call_t url_h
     espconn_accept(&esp_conn);
     LOGI("[ZLIB_WEB_SERVER]web_server_init[port:%d]:\n", port);
 
-    for(i=0;i<_g_app_handlers_count;i++)
+    for (i = 0; i < _g_app_handlers_count; i++)
     {
-        LOGD("[ZLIB_WEB_SERVER] %d:%s\n",i,_g_app_handlers[i].uri);
+        LOGD("[ZLIB_WEB_SERVER] %d:%s\n", i, _g_app_handlers[i].uri);
     }
 }
 
@@ -375,6 +373,7 @@ void ICACHE_FLASH_ATTR zlib_web_server_init(uint16_t port, URL_Http_Call_t url_h
  */
 void ICACHE_FLASH_ATTR zlib_web_server_reply(void *arg, bool responseOK, enum ContentType content_type, char *psend)
 {
+    if(arg == NULL) return;
     uint16 length = 0;
     char *pbuf = NULL;
     char httphead[256];

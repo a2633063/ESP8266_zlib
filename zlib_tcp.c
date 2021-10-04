@@ -66,5 +66,9 @@ void ICACHE_FLASH_ATTR zlib_tcp_set_received_callback(zlib_tcp_received_callback
  */
 void ICACHE_FLASH_ATTR zlib_tcp_reply(void *arg, char *psend)
 {
+    if(arg == NULL)
+    {
+        arg = &_ptrespconn;
+    }
     espconn_send(arg, psend, os_strlen(psend));
 }
