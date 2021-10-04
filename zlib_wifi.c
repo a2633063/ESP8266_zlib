@@ -267,7 +267,7 @@ void ICACHE_FLASH_ATTR zlib_wifi_set_callback(zlib_wifi_callback_function _zlib_
  */
 void ICACHE_FLASH_ATTR zlib_wifi_AP()
 {
-    if(wifi_get_opmode() == STATIONAP_MODE) return;
+    if(wifi_get_opmode() == SOFTAP_MODE) return;
 
     //设置为ap模式
     wifi_set_opmode_current(SOFTAP_MODE);
