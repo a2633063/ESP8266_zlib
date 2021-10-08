@@ -69,9 +69,9 @@ typedef struct URL_Http_Call_t
 
 
 
-extern void ICACHE_FLASH_ATTR zlib_web_server_init(uint16_t port, URL_Http_Call_t url_http_call[], uint8_t http_num);
-extern void ICACHE_FLASH_ATTR zlib_web_server_reply(void *arg, bool responseOK, enum ContentType content_type, char *psend);
-extern int16_t ICACHE_FLASH_ATTR zlib_web_server_get_tag_val(char * pusrdata, char *tag, char *value, uint16_t max_length);
-
+extern void zlib_web_server_init(uint16_t port, URL_Http_Call_t url_http_call[], uint8_t http_num);
+extern void zlib_web_server_reply(void *arg, bool responseOK, enum ContentType content_type, char *psend);
+extern int16_t zlib_web_server_get_tag_val(char * pusrdata, char *tag, char *value, uint16_t max_length);
+extern int16_t zlib_web_server_decode(char * pusrdata, char *value, uint16_t max_length);
 #endif
 

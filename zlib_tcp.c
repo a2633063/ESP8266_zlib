@@ -64,11 +64,11 @@ void ICACHE_FLASH_ATTR zlib_tcp_set_received_callback(zlib_tcp_received_callback
  *         psend -- The send data
  * 返        回: 无
  */
-void ICACHE_FLASH_ATTR zlib_tcp_reply(void *arg, char *psend)
+void ICACHE_FLASH_ATTR zlib_tcp_reply(void *arg, char *psend, uint16_t length)
 {
     if(arg == NULL)
     {
         arg = &_ptrespconn;
     }
-    espconn_send(arg, psend, os_strlen(psend));
+    espconn_send(arg, psend, length);
 }

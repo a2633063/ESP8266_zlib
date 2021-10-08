@@ -112,7 +112,7 @@ static void ICACHE_FLASH_ATTR _mqtt_con_received(uint32_t *arg, const char* topi
 
     if(_mqtt_received != NULL)
     {
-        bool b = _mqtt_received(arg, topicBuf, dataBuf);
+        bool b = _mqtt_received(arg, topicBuf, topic_len, dataBuf, data_len);
         if(!b) return;
     }
     zlib_json_deal(arg, WIFI_COMM_TYPE_MQTT, dataBuf, (void *) topicBuf);
@@ -179,7 +179,7 @@ void ICACHE_FLASH_ATTR zlib_mqtt_init(char *host, uint16_t port, mqtt_connect_in
     os_timer_disarm(&_timer_mqtt);
     os_timer_setfn(&_timer_mqtt, (os_timer_func_t *) _mqtt_timer_func, &mqttClient);
     os_timer_arm(&_timer_mqtt, 1000, true);
-    LOGI("[ZLIB_MQTT]mqtt init %d:%d\n", host,port);
+    LOGI("[ZLIB_MQTT]mqtt init %s:%d\n", host, port);
 }
 
 /**
@@ -260,4 +260,15 @@ void ICACHE_FLASH_ATTR zlib_mqtt_disconnect(void)
 bool ICACHE_FLASH_ATTR zlib_mqtt_send_message(char *topic, char* message, int qos, int retain)
 {
     return zlib_mqtt_is_connected ? MQTT_Publish(&mqttClient, topic, message, os_strlen(message), qos, retain) : false;
+}
+
+/**
+ * 函  数  名: zlib_mqtt_send_byte
+ * 函数说明: mqtt发送数据
+ * 参        数: topic,message,qos,retain
+ * 返        回: 无
+ */
+bool ICACHE_FLASH_ATTR zlib_mqtt_send_byte(char *topic, char* message, int data_length, int qos, int retain)
+{
+    return zlib_mqtt_is_connected ? MQTT_Publish(&mqttClient, topic, message, data_length, qos, retain) : false;
 }

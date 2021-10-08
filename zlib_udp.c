@@ -69,7 +69,7 @@ void ICACHE_FLASH_ATTR zlib_udp_set_received_callback(zlib_udp_received_callback
  *         psend -- The send data
  * 返        回: 无
  */
-void ICACHE_FLASH_ATTR zlib_udp_reply(void *arg, char *psend)
+void ICACHE_FLASH_ATTR zlib_udp_reply(void *arg, char *psend, uint16_t length)
 {
     struct espconn *pesp_conn;
     if(arg == NULL)
@@ -90,6 +90,6 @@ void ICACHE_FLASH_ATTR zlib_udp_reply(void *arg, char *psend)
     pesp_conn->proto.udp->remote_ip[1] = 255;
     pesp_conn->proto.udp->remote_ip[2] = 255;
     pesp_conn->proto.udp->remote_ip[3] = 255;
-    espconn_send(pesp_conn, psend, os_strlen(psend));
+    espconn_send(pesp_conn, psend, length);
 }
 

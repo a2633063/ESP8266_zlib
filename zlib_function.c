@@ -52,12 +52,12 @@ void ICACHE_FLASH_ATTR zlib_fun_wifi_send(void *arg, Wifi_Comm_type_t type, char
         }
         case WIFI_COMM_TYPE_UDP:
         {
-            zlib_udp_reply(arg, (char *) s);
+            zlib_udp_reply(arg, (char *) s, os_strlen(s));
             break;
         }
         case WIFI_COMM_TYPE_TCP:
         {
-            zlib_tcp_reply(arg, (char *) s);
+            zlib_tcp_reply(arg, (char *) s, os_strlen(s));
             break;
         }
         case WIFI_COMM_TYPE_HTTP:

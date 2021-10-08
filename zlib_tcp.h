@@ -22,7 +22,7 @@ typedef bool (*zlib_tcp_received_callback_function)(void *arg, char *pusrdata, u
 
 extern void zlib_tcp_init(uint16_t port);
 extern void zlib_tcp_set_received_callback(zlib_tcp_received_callback_function cb);
-extern void zlib_tcp_reply(void *arg, char *psend);
+extern void zlib_tcp_reply(void *arg, char *psend, uint16_t length);
 
 #endif
 

@@ -26,12 +26,21 @@ int ICACHE_FLASH_ATTR zlib_web_config_send_wifisetting_page(void *arg, URL_Frame
     return 0;
 }
 /**
- * 函  数  名: zlib_web_config_json
- * 函数说明: web http回复json
+ * 函  数  名: zlib_web_config_json_get/zlib_web_config_json_post
+ * 函数说明: web http回复get/post json
  * 参        数:
  * 返        回: 无
  */
-int ICACHE_FLASH_ATTR zlib_web_config_json(void *arg, URL_Frame *purl_frame)
+int ICACHE_FLASH_ATTR zlib_web_config_json_get(void *arg, URL_Frame *purl_frame)
+{
+    struct espconn *ptrespconn = arg;
+    char temp_str[URL_GET_DAT_MAX_LENGTH];
+    zlib_web_server_decode(purl_frame->pGetdat, temp_str, URL_GET_DAT_MAX_LENGTH);
+    LOGD("[ZLIB_WEB_CONFIG]json get:%s\n",temp_str);
+    zlib_json_deal(arg, WIFI_COMM_TYPE_HTTP, temp_str, purl_frame->pGetdat);
+    return 0;
+}
+int ICACHE_FLASH_ATTR zlib_web_config_json_post(void *arg, URL_Frame *purl_frame)
 {
     struct espconn *ptrespconn = arg;
     //zlib_web_server_reply(ptrespconn, true, APPLICATIOIN_JSON, (char *)web_wifisetting_html);

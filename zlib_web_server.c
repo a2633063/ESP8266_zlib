@@ -553,3 +553,53 @@ int16_t ICACHE_FLASH_ATTR zlib_web_server_get_tag_val(char * pusrdata, char *tag
     }
 
 }
+
+/**
+ * 函  数  名: zlib_web_server_decode
+ * 函数说明: 将http中编码后的字符串解码
+ * 参        数:  pusrdata: get/post的数据
+ *          value:  获取到的字符串
+ * 返        回: >0:获取到value的长度     -1:失败     -2:pusrdata格式不符合get/post数据格式        -3:tag错误
+ */
+int16_t ICACHE_FLASH_ATTR zlib_web_server_decode(char * pusrdata, char *value, uint16_t max_length)
+{
+    uint16_t count = 0;
+    int16_t c1, c2;
+    char *ptr;
+    char *value_p;
+
+    if(pusrdata == NULL) return -1;
+
+    ptr = pusrdata;
+    value_p = value;
+
+    while (value_p != '\0' && count < max_length)
+    {
+        if(*ptr == '%')
+        {
+            ptr++;
+            c1 = char2nibble(*ptr);
+            ptr++;
+            c2 = char2nibble(*ptr);
+
+            if(c1 == -1 || c2 == -1)
+            {
+                LOGE("[ZLIB_WEB_SERVER]Invalid URL-encoded string!(tag)\n");
+                return -2;
+            }
+
+            *value_p = (c1 << 4 | c2);
+        }
+        else
+        {
+            *value_p = *ptr;
+        }
+        ptr++;
+        value_p++;    //此字符正确 对比下一个字符
+        count++;
+    }
+    *value_p = '\0';
+    return count;
+
+}
+

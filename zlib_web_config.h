@@ -21,7 +21,7 @@
 #define ZLIB_WEB_CONFIG_HTTP \
  { "/", zlib_web_config_send_wifisetting_page, NULL, NULL, NULL }, \
  { "/result.htm", NULL,zlib_web_config_send_result_page, NULL, NULL },  \
- { "/json.html", NULL, zlib_web_config_json, NULL, NULL },        \
+ { "/json.html", zlib_web_config_json_get, zlib_web_config_json_post, NULL, NULL },        \
  { "/mqtt", zlib_web_mqtt_send_wifisetting_page, NULL, NULL, NULL }, \
  { "/mqttresult.html", NULL,zlib_web_mqtt_send_result_page, NULL, NULL }
 
@@ -30,6 +30,10 @@ extern void zlib_web_config_init(void);
 #endif
 extern int ICACHE_FLASH_ATTR zlib_web_config_send_wifisetting_page(void *arg, URL_Frame *purl_frame);
 extern int ICACHE_FLASH_ATTR zlib_web_config_send_result_page(void *arg, URL_Frame *purl_frame);
+extern int ICACHE_FLASH_ATTR zlib_web_config_json_post(void *arg, URL_Frame *purl_frame);
+extern int ICACHE_FLASH_ATTR zlib_web_config_json_get(void *arg, URL_Frame *purl_frame);
+extern int ICACHE_FLASH_ATTR zlib_web_mqtt_send_result_page(void *arg, URL_Frame *purl_frame);
+extern int ICACHE_FLASH_ATTR zlib_web_mqtt_send_topic_page(void *arg, URL_Frame *purl_frame);
 
 #endif
 
