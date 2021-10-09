@@ -116,6 +116,8 @@ static void ICACHE_FLASH_ATTR _mqtt_con_received(uint32_t *arg, const char* topi
         if(!b) return;
     }
     zlib_json_deal(arg, WIFI_COMM_TYPE_MQTT, dataBuf, (void *) topicBuf);
+    os_free(topicBuf);
+    os_free(dataBuf);
 }
 static void _mqtt_connected_cb(uint32_t *args)
 {
