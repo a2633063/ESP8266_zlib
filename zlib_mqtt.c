@@ -113,11 +113,14 @@ static void ICACHE_FLASH_ATTR _mqtt_con_received(uint32_t *arg, const char* topi
     if(_mqtt_received != NULL)
     {
         bool b = _mqtt_received(arg, topicBuf, topic_len, dataBuf, data_len);
-        if(!b) return;
+        if(!b) goto EXIT;
     }
     zlib_json_deal(arg, WIFI_COMM_TYPE_MQTT, dataBuf, (void *) topicBuf);
+
+    EXIT:
     os_free(topicBuf);
     os_free(dataBuf);
+    return;
 }
 static void _mqtt_connected_cb(uint32_t *args)
 {

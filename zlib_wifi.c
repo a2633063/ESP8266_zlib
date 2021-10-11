@@ -146,7 +146,7 @@ static void _zlib_wifi_handle_event_cb(System_Event_t *evt)
             LOGI("\n");
 
             struct station_config wifi_config;
-            wifi_station_get_config(&wifi_config);
+            //wifi_station_get_config(&wifi_config);
 //            LOGD("[ZLIB_WIFI]ssid:%s\n", wifi_config.ssid);
 //            LOGD("[ZLIB_WIFI]bssid_set:%d\n", wifi_config.bssid_set);
 //            LOGD("[ZLIB_WIFI]bssid:"MACSTR"\n", MAC2STR(wifi_config.bssid));
@@ -154,7 +154,7 @@ static void _zlib_wifi_handle_event_cb(System_Event_t *evt)
 //            LOGD("[ZLIB_WIFI]authmode:%d\n", wifi_config.threshold.authmode);
 //            LOGD("[ZLIB_WIFI]all_channel_scan:%d\n", wifi_config.all_channel_scan);
 //            wifi_config.all_channel_scan = false;
-            wifi_station_set_config(&wifi_config);
+            //wifi_station_set_config(&wifi_config);
             os_sprintf(str_ip, IPSTR, IP2STR(&evt->event_info.got_ip.ip));
 
 #if defined(ZLIB_WIFI_STATE_LED_IO_MUX) && defined(ZLIB_WIFI_STATE_LED_IO_NUM)&& defined(ZLIB_WIFI_STATE_LED_IO_FUNC)
