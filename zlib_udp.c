@@ -93,3 +93,34 @@ void ICACHE_FLASH_ATTR zlib_udp_reply(void *arg, char *psend, uint16_t length)
     espconn_send(pesp_conn, psend, length);
 }
 
+/**
+ * 函  数  名: zlib_udp_reply
+ * 函数说明: 回复tcp请求
+ * 参        数:  arg -- argument to set for client or server
+ *         psend -- The send data
+ * 返        回: 无
+ */
+void ICACHE_FLASH_ATTR zlib_udp_send_ip_port(void *arg, char *psend, uint16_t length, uint8_t ip[4], uint16_t port)
+{
+    struct espconn *pesp_conn;
+    if(arg == NULL)
+    {
+        pesp_conn = &_ptrespconn;
+    }
+    else
+    {
+        pesp_conn = arg;
+    }
+//    LOGD("[ZLIB_UDP]udp reply:ip:%d.%d.%d.%d:%d\n",pesp_conn->proto.udp->remote_ip[0]
+//            ,pesp_conn->proto.udp->remote_ip[1]
+//            ,pesp_conn->proto.udp->remote_ip[2]
+//            ,pesp_conn->proto.udp->remote_ip[3]
+//            ,pesp_conn->proto.udp->remote_port);
+    pesp_conn->proto.udp->remote_port = port;  //端口
+    pesp_conn->proto.udp->remote_ip[0] = ip[1];   //udp广播ַ
+    pesp_conn->proto.udp->remote_ip[1] = ip[2];
+    pesp_conn->proto.udp->remote_ip[2] = ip[3];
+    pesp_conn->proto.udp->remote_ip[3] = ip[4];
+    espconn_send(pesp_conn, psend, length);
+}
+

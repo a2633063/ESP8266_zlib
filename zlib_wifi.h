@@ -45,4 +45,5 @@ extern uint8_t * zlib_wifi_get_mac(void);
 extern uint8_t * zlib_wifi_get_mac_str(void);
 extern uint8_t * ICACHE_FLASH_ATTR zlib_wifi_get_ip_str(void);
 extern state_wifi_state_t zlib_wifi_get_state(void);
+extern void ICACHE_FLASH_ATTR zlib_wifi_mac_init(void);
 #endif

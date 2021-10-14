@@ -5,7 +5,8 @@
 #define ZLIB_SETTING_SAVE_ADDR  (0x70)  //储存地址
 #endif
 
-extern SpiFlashOpResult ICACHE_FLASH_ATTR zlib_setting_save_config(void *arg, uint32_t length);
-extern SpiFlashOpResult ICACHE_FLASH_ATTR zlib_setting_get_config(void *arg, uint32_t length);
-
+extern SpiFlashOpResult zlib_setting_save_config(void *arg, uint32_t length);
+extern SpiFlashOpResult zlib_setting_get_config(void *arg, uint32_t length);
+extern SpiFlashOpResult zlib_setting_save_flash(uint16_t addr, void *arg, uint32_t length);
+extern SpiFlashOpResult zlib_setting_get_flash(uint16_t addr, void *arg, uint32_t length);
 #endif

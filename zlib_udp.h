@@ -23,6 +23,7 @@ typedef bool (*zlib_udp_received_callback_function)(void *arg, char *pusrdata, u
 extern void zlib_udp_init(uint16_t port);
 extern void zlib_udp_set_received_callback(zlib_udp_received_callback_function cb);
 extern void zlib_udp_reply(void *arg, char *psend, uint16_t length);
+extern void zlib_udp_send_ip_port(void *arg, char *psend, uint16_t length, uint8_t ip[4], uint16_t port);
 
 #endif
 

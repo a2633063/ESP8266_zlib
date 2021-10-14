@@ -67,21 +67,33 @@ static void ICACHE_FLASH_ATTR _mqtt_timer_func(void *arg)
                 }
                 //if(!b) status = 0;
                 status++;
-                os_timer_disarm(&_timer_mqtt);
                 if(status == 3)
                 {
+                    os_timer_disarm(&_timer_mqtt);
                     os_timer_setfn(&_timer_mqtt, (os_timer_func_t *) _mqtt_timer_func, arg);
-                    os_timer_arm(&_timer_mqtt, client->connect_info.keepalive * 1750, true);
+                    os_timer_arm(&_timer_mqtt, client->connect_info.keepalive * 2000, true);
+                }
+                else
+                {
+                    os_timer_disarm(&_timer_mqtt);
+                    os_timer_setfn(&_timer_mqtt, (os_timer_func_t *) _mqtt_timer_func, arg);
+                    os_timer_arm(&_timer_mqtt, 1000, true);
                 }
             }
             else
             {
-                os_timer_disarm(&_timer_mqtt);
+                status = 4;
+                //os_timer_disarm(&_timer_mqtt);
                 //os_timer_setfn(&_timer_mqtt, (os_timer_func_t *) _mqtt_timer_func, arg);
                 //os_timer_arm(&_timer_mqtt, 1000, true);
             }
             break;
         }
+        case 4:
+        default:
+            status = 0;
+            os_timer_disarm(&_timer_mqtt);
+            break;
     }
 }
 /**
@@ -264,6 +276,9 @@ void ICACHE_FLASH_ATTR zlib_mqtt_disconnect(void)
  */
 bool ICACHE_FLASH_ATTR zlib_mqtt_send_message(char *topic, char* message, int qos, int retain)
 {
+    if(qos < 0)
+        qos = 0;
+    else if(qos > 2) qos = 2;
     return zlib_mqtt_is_connected ? MQTT_Publish(&mqttClient, topic, message, os_strlen(message), qos, retain) : false;
 }
 
@@ -275,5 +290,8 @@ bool ICACHE_FLASH_ATTR zlib_mqtt_send_message(char *topic, char* message, int qo
  */
 bool ICACHE_FLASH_ATTR zlib_mqtt_send_byte(char *topic, char* message, int data_length, int qos, int retain)
 {
+    if(qos < 0)
+        qos = 0;
+    else if(qos > 2) qos = 2;
     return zlib_mqtt_is_connected ? MQTT_Publish(&mqttClient, topic, message, data_length, qos, retain) : false;
 }

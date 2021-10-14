@@ -1,9 +1,9 @@
 #include "zlib.h"
 #include "zlib_wifi.h"
 
-static uint8_t hw_mac[6];
-static uint8_t str_mac[16];
-static uint8_t str_ip[16];
+static uint8_t hw_mac[6] = { 0 };
+static uint8_t str_mac[16] = { 0 };
+static uint8_t str_ip[16] = { 0 };
 static state_wifi_state_t wifi_states = STATE_WIFI_STAMODE_IDE;
 struct _zlib_wifi_callback_t
 {
@@ -131,7 +131,7 @@ static void _zlib_wifi_handle_event_cb(System_Event_t *evt)
             //若定义了wifi指示灯,则初始化灯
             wifi_status_led_uninstall();
             wifi_status_led_install(ZLIB_WIFI_STATE_LED_IO_NUM, ZLIB_WIFI_STATE_LED_IO_MUX,
-                    ZLIB_WIFI_STATE_LED_IO_FUNC);
+            ZLIB_WIFI_STATE_LED_IO_FUNC);
 #endif
 #if (ZLIB_WIFI_CALLBACK_REPEAT)
             _zlib_wifi_cb_repeat_start();
@@ -198,7 +198,7 @@ void ICACHE_FLASH_ATTR zlib_wifi_init(bool ap)
     uint8_t i;
     _zlib_wifi_callback.wifi_cb = NULL;
     //设置为station模式
-    wifi_set_opmode(STATION_MODE);
+    if(wifi_get_opmode() == STATION_MODE) wifi_set_opmode(STATION_MODE);
 
     //设置自动连接AP
     if(wifi_station_get_auto_connect() == 0)
@@ -211,9 +211,11 @@ void ICACHE_FLASH_ATTR zlib_wifi_init(bool ap)
     wifi_set_event_handler_cb(_zlib_wifi_handle_event_cb);
 
     //获取mac
-    wifi_get_macaddr(STATION_IF, hw_mac);
-    os_sprintf(str_mac, "%02x%02x%02x%02x%02x%02x", MAC2STR(hw_mac));
-    LOGI("[ZLIB_WIFI]str_mac : %s \n", str_mac);
+    zlib_wifi_mac_init();
+
+    char strName[32] = { 0 };
+    os_sprintf(strName, DEVICE_NAME, zlib_wifi_get_mac_str() + 8);
+    wifi_station_set_hostname(strName);
 
     //获取保存ssid数量
     struct station_config config[5];
@@ -316,7 +318,7 @@ void ICACHE_FLASH_ATTR zlib_wifi_set_ssid_delay(char *ssid, char * password, uin
     static struct station_config config;
     os_memset(&config, 0, sizeof(struct station_config));
     LOGI("[ZLIB_WIFI]set ssid:%s    pwd:%s\n", ssid, password);
-    config.bssid_set=0;
+    config.bssid_set = 0;
     os_memcpy(&config.ssid, ssid, 32);
     os_memcpy(&config.password, password, 64);
 
@@ -352,4 +354,20 @@ uint8_t * ICACHE_FLASH_ATTR zlib_wifi_get_ip_str(void)
 state_wifi_state_t ICACHE_FLASH_ATTR zlib_wifi_get_state(void)
 {
     return wifi_states;
+}
+/**
+ * 函  数  名: zlib_wifi_mac_init
+ * 函数说明: 初始化mac地址
+ * 参        数: 无
+ * 返        回: 无
+ */
+void ICACHE_FLASH_ATTR zlib_wifi_mac_init(void)
+{
+    if(str_mac[0] != 0) return;
+    //设置为station模式
+    if(wifi_get_opmode() == STATION_MODE) wifi_set_opmode(STATION_MODE);
+    //获取mac
+    wifi_get_macaddr(STATION_IF, hw_mac);
+    os_sprintf(str_mac, "%02x%02x%02x%02x%02x%02x", MAC2STR(hw_mac));
+    LOGI("[ZLIB_WIFI]str_mac : %s \n", str_mac);
 }
