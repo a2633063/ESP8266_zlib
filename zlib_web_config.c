@@ -187,7 +187,7 @@ int ICACHE_FLASH_ATTR zlib_web_mqtt_send_result_page(void *arg, URL_Frame *purl_
 //------------------    mqtt部分结束    ------------------------------------------------------
 
 #if (ZLIB_WEB_CONFIG_ONLY)
-static URL_Http_Call_t g_app_handlers[] = {
+const static URL_Http_Call_t g_app_handlers[] = {
 ZLIB_WEB_CONFIG_HTTP };
 /**
  * 函  数  名: zlib_web_config_init

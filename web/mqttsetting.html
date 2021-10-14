@@ -49,38 +49,38 @@ html{font-size:62.5%;}
 .wifi-set .content{
 	margin:10px;
 	-webkit-box-flex: 1;
-    -moz-box-flex: 1;
-    -webkit-flex: 1;
-    -ms-flex: 1;
-    flex: 1;
+	-moz-box-flex: 1;
+	-webkit-flex: 1;
+	-ms-flex: 1;
+	flex: 1;
 }
 .geteway-info-box .input-field{
 	line-height:20px;
 	vertical-align:middle;
 	border: 1px solid #d7d7d7;
-    height: 58px;
-    background: #fff;
-    box-sizing: border-box;
-    position: relative;
-    margin-bottom: -1px;
-    padding: 19px 15px 19px 18px;
+	height: 58px;
+	background: #fff;
+	box-sizing: border-box;
+	position: relative;
+	margin-bottom: -1px;
+	padding: 19px 15px 19px 18px;
 }
 .input-field input {
-    height: 20px;
-    line-height: 20px;
-    font-size: 14px;
-    width: 100%;
-    border: 0 none;
-    background: transparent;
+	height: 20px;
+	line-height: 20px;
+	font-size: 14px;
+	width: 100%;
+	border: 0 none;
+	background: transparent;
 	outline: medium;
 }
 .input-field:first-of-type {
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
 }
 .input-field:last-of-type {
-    border-bottom-left-radius: 5px;
-    border-bottom-right-radius: 5px;
+	border-bottom-left-radius: 5px;
+	border-bottom-right-radius: 5px;
 }
 .btn{
 	height:40px;
@@ -102,7 +102,7 @@ html{font-size:62.5%;}
 	background-color:#f56c6c;
 }
 .geteway-btn button {
-    width: 100%;
+	width: 100%;
 	margin:35px 0;
 }
 </style>
@@ -111,23 +111,23 @@ html{font-size:62.5%;}
 
 <body>
 <div class="main wifi-set">
-    <header  class="header">
-        <h3>MQTT设置</h3>
-    </header>
-    <div class="content">
-	<form action="mqttresult.html" method="post">
-       <section class="geteway-info-box">
-          <div class="input-field">
-             <input id="url" type="text" name="URL" value="" placeholder="MQTT服务器地址:端口(mqtt.com:1883)">
-          </div>
-          <div class="input-field">
-             <input id="user" type="text" name="USER" value="" placeholder="登录用户名">
-          </div>
-          <div class="input-field">
-             <input type="text" name="PASS" value="" placeholder="登录密码">
-          </div>
-        </section>
-        <section class="geteway-btn"><button type="submit" name="next" class="btn btn-red btn-next">下一步</button></section>
+	<header  class="header">
+		<h3>MQTT设置</h3>
+	</header>
+	<div class="content">
+	<form action="mqttresult" method="post">
+	<section class="geteway-info-box">
+		<div class="input-field">
+			<input id="url" type="text" name="URL" value="" placeholder="MQTT服务器地址:端口(mqtt.com:1883)">
+		</div>
+		<div class="input-field">
+			<input id="user" type="text" name="USER" value="" placeholder="登录用户名">
+		</div>
+		<div class="input-field">
+			<input type="text" name="PASS" value="" placeholder="登录密码">
+		</div>
+	</section>
+	<section class="geteway-btn"><button type="submit" name="next" class="btn btn-red btn-next">下一步</button></section>
 	</form>
     </div>
 </div>

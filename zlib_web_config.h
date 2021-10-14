@@ -20,10 +20,10 @@
 
 #define ZLIB_WEB_CONFIG_HTTP \
  { "/", zlib_web_config_send_wifisetting_page, NULL, NULL, NULL }, \
- { "/result.htm", NULL,zlib_web_config_send_result_page, NULL, NULL },  \
- { "/json.html", zlib_web_config_json_get, zlib_web_config_json_post, NULL, NULL },        \
+ { "/result", NULL,zlib_web_config_send_result_page, NULL, NULL },  \
+ { "/json", zlib_web_config_json_get, zlib_web_config_json_post, NULL, NULL },        \
  { "/mqtt", zlib_web_mqtt_send_wifisetting_page, NULL, NULL, NULL }, \
- { "/mqttresult.html", NULL,zlib_web_mqtt_send_result_page, NULL, NULL }
+ { "/mqttresult", NULL,zlib_web_mqtt_send_result_page, NULL, NULL }
 
 #if (ZLIB_WEB_CONFIG_ONLY)
 extern void zlib_web_config_init(void);
