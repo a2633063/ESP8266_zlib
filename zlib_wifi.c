@@ -198,7 +198,7 @@ void ICACHE_FLASH_ATTR zlib_wifi_init(bool ap)
     uint8_t i;
     _zlib_wifi_callback.wifi_cb = NULL;
     //设置为station模式
-    if(wifi_get_opmode() == STATION_MODE) wifi_set_opmode(STATION_MODE);
+    if(wifi_get_opmode() != STATION_MODE) wifi_set_opmode(STATION_MODE);
 
     //设置自动连接AP
     if(wifi_station_get_auto_connect() == 0)
