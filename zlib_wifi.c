@@ -45,9 +45,9 @@ static void _wifi_mdns_timer_fun(void *arg)
     info->server_name = "zcontrol";
     info->server_port = 10182;
     //info.txt_data[0] = "version = "VERSION;
-    os_sprintf(mdns_data_mac, "mac = %s", zlib_wifi_get_mac_str());
+    os_sprintf(mdns_data_mac, "mac=%s", zlib_wifi_get_mac_str());
     info->txt_data[0] = mdns_data_mac;
-    os_sprintf(mdns_data_type, "type = %d", TYPE);
+    os_sprintf(mdns_data_type, "type=%d", TYPE);
     info->txt_data[1] = mdns_data_type;
 
     espconn_mdns_init(info);
