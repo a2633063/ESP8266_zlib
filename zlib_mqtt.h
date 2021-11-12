@@ -13,6 +13,18 @@
 #include "zlib.h"
 #include "zlib_mqtt.h"
 
+
+typedef enum
+{
+    ENUM_MQTT_STATUS_UNINITIALIZED = 0,       //未初始化
+    ENUM_MQTT_STATUS_INITIALIZED = 1,            //已初始化
+    ENUM_MQTT_STATUS_DISCONNECTED = 2,      //未连接
+    ENUM_MQTT_STATUS_CONNECTED = 3,  //已连接
+
+}ENUM_MQTT_STATUS;
+
+
+
 typedef struct zlib_mqtt_topic_info
 {
     char* topic;
@@ -34,7 +46,7 @@ typedef bool (*zlib_mqtt_received_callback_function)(uint32_t *arg, const char* 
 
 extern void zlib_mqtt_init(char *host, uint16_t port, mqtt_connect_info_t *mqtt_info);
 extern void zlib_mqtt_set_received_callback(zlib_mqtt_received_callback_function cb);
-//extern void zlib_mqtt_reply(void *arg, char *psend);
+
 extern void zlib_mqtt_subscribe(zlib_mqtt_topic_info_t *p, uint8_t count);
 extern void zlib_mqtt_set_online_message(zlib_mqtt_message_info_t *p, uint8_t count);
 extern bool zlib_mqtt_is_connected(void);

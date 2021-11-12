@@ -1,5 +1,6 @@
 #include "zlib.h"
 #include "zlib_wifi.h"
+#include "zlib_mqtt.h"
 
 static uint8_t hw_mac[6] = { 0 };
 static uint8_t str_mac[16] = { 0 };
@@ -167,6 +168,7 @@ static void _zlib_wifi_handle_event_cb(System_Event_t *evt)
 //            os_timer_setfn(&_timer_mdns, (os_timer_func_t *) _wifi_mdns_timer_fun, NULL);
 //            os_timer_arm(&_timer_mdns, 1000, false);
 #endif
+            zlib_mqtt_connect();
             break;
         }
         case EVENT_STAMODE_CONNECTED:

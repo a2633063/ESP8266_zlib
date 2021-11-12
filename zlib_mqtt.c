@@ -19,7 +19,7 @@ static zlib_mqtt_topic_info_t *_mqtt_topic = NULL;
 static uint8_t _mqtt_topic_num = 0;
 static zlib_mqtt_message_info_t *_mqtt_online_message = NULL;
 static uint8_t _mqtt_online_message_num = 0;
-static bool _mqtt_is_connected = false;
+static ENUM_MQTT_STATUS _mqtt_status = ENUM_MQTT_STATUS_UNINITIALIZED;
 
 static zlib_mqtt_received_callback_function _mqtt_received = NULL;
 
@@ -38,62 +38,47 @@ static void ICACHE_FLASH_ATTR _mqtt_timer_func(void *arg)
     switch (status)
     {
         case 0:
-        {   //等待wifi连接
-            if(wifi_get_opmode() != STATION_MODE) return;
-            if(zlib_wifi_get_state() != STATE_WIFI_STAMODE_GOT_IP) return;
-            zlib_mqtt_connect();
-            status++;
-            break;
-        }
         case 1:
         {
-            if(zlib_mqtt_is_connected() == false) return;
-            LOGI("[ZLIB_MQTT]mqtt connected!\n");
-            status++;
-            break;
+            if(_mqtt_online_message == NULL)
+            {
+                status = 2;
+                break;
+            }
+
+            for (i = 0; i < _mqtt_online_message_num; i++)
+            {
+                bool b = zlib_mqtt_send_message(_mqtt_online_message[i].topic, _mqtt_online_message[i].message,
+                        _mqtt_online_message[i].qos, _mqtt_online_message[i].retain);
+
+                LOGI("[ZLIB_MQTT]send online message to mqtt[%s]:%s\n", _mqtt_online_message[i].topic,
+                        _mqtt_online_message[i].message);
+            }
+            //if(!b) status = 0;
+            if(status == 0)
+            {
+                status++;
+                os_timer_disarm(&_timer_mqtt);
+                os_timer_setfn(&_timer_mqtt, (os_timer_func_t *) _mqtt_timer_func, arg);
+                os_timer_arm(&_timer_mqtt, client->connect_info.keepalive * 2000, true);
+                break;
+            }
+            //如果已经发送2次online message,则停止定时器(继续执行case 2),因此此处没有break;
         }
         case 2:
-        case 3:
         {
-            if(_mqtt_online_message != NULL)
-            {
-                for (i = 0; i < _mqtt_online_message_num; i++)
-                {
-                    bool b = zlib_mqtt_send_message(_mqtt_online_message[i].topic, _mqtt_online_message[i].message,
-                            _mqtt_online_message[i].qos, _mqtt_online_message[i].retain);
-
-                    LOGI("[ZLIB_MQTT]send online message to mqtt[%s]:%s\n", _mqtt_online_message[i].topic,
-                            _mqtt_online_message[i].message);
-                }
-                //if(!b) status = 0;
-                status++;
-                if(status == 3)
-                {
-                    os_timer_disarm(&_timer_mqtt);
-                    os_timer_setfn(&_timer_mqtt, (os_timer_func_t *) _mqtt_timer_func, arg);
-                    os_timer_arm(&_timer_mqtt, client->connect_info.keepalive * 2000, true);
-                }
-                else
-                {
-                    os_timer_disarm(&_timer_mqtt);
-                    os_timer_setfn(&_timer_mqtt, (os_timer_func_t *) _mqtt_timer_func, arg);
-                    os_timer_arm(&_timer_mqtt, 1000, true);
-                }
-            }
-            else
-            {
-                status = 4;
-                //os_timer_disarm(&_timer_mqtt);
-                //os_timer_setfn(&_timer_mqtt, (os_timer_func_t *) _mqtt_timer_func, arg);
-                //os_timer_arm(&_timer_mqtt, 1000, true);
-            }
-            break;
-        }
-        case 4:
-        default:
             status = 0;
             os_timer_disarm(&_timer_mqtt);
             break;
+        }
+        default:
+        {   //其他任何情况都重新启动定时器来发送数据
+            status = 0;
+            os_timer_disarm(&_timer_mqtt);
+            os_timer_setfn(&_timer_mqtt, (os_timer_func_t *) _mqtt_timer_func, arg);
+            os_timer_arm(&_timer_mqtt, 1000, true);
+            break;
+        }
     }
 }
 /**
@@ -145,21 +130,21 @@ static void _mqtt_connected_cb(uint32_t *args)
         for (i = 0; i < _mqtt_topic_num; i++)
         {
             MQTT_Subscribe(client, _mqtt_topic[i].topic, _mqtt_topic[i].qos);
-            LOGD("[ZLIB_MQTT] %d: %s,[%d]:\r\n", i, _mqtt_topic[i].topic, _mqtt_topic[i].qos);
+            LOGD("[ZLIB_MQTT]\t %d: %s,[%d]:\r\n", i, _mqtt_topic[i].topic, _mqtt_topic[i].qos);
         }
     }
 
-    _mqtt_is_connected = true;
+    _mqtt_status = ENUM_MQTT_STATUS_CONNECTED;
+    os_timer_disarm(&_timer_mqtt);
+    os_timer_setfn(&_timer_mqtt, (os_timer_func_t *) _mqtt_timer_func, args);
+    os_timer_arm(&_timer_mqtt, 1000, true);
 
 }
 static void _mqtt_disconnected_cb(uint32_t *args)
 {
-    _mqtt_is_connected = false;
+    _mqtt_status = ENUM_MQTT_STATUS_DISCONNECTED;
     //MQTT_Client* client = (MQTT_Client*) args;
     LOGE("[ZLIB_MQTT]mqtt disconnected\r\n");
-    os_timer_disarm(&_timer_mqtt);
-    os_timer_setfn(&_timer_mqtt, (os_timer_func_t *) _mqtt_timer_func, args);
-    os_timer_arm(&_timer_mqtt, 1000, true);
 }
 /**
  * 函  数  名: zlib_mqtt_init
@@ -171,7 +156,6 @@ static void _mqtt_disconnected_cb(uint32_t *args)
  */
 void ICACHE_FLASH_ATTR zlib_mqtt_init(char *host, uint16_t port, mqtt_connect_info_t *mqtt_info)
 {
-
     if((host == NULL || mqtt_info == NULL || port == 0) || (mqtt_info->client_id == NULL ) || (os_strlen(host) < 2))
     {
         LOGW("[ZLIB_MQTT]mqtt info error, mqtt deinit\n");
@@ -193,9 +177,7 @@ void ICACHE_FLASH_ATTR zlib_mqtt_init(char *host, uint16_t port, mqtt_connect_in
 //    MQTT_OnPublished(&mqttClient, mqttPublishedCb);
     MQTT_OnData(&mqttClient, _mqtt_con_received);
 
-    os_timer_disarm(&_timer_mqtt);
-    os_timer_setfn(&_timer_mqtt, (os_timer_func_t *) _mqtt_timer_func, &mqttClient);
-    os_timer_arm(&_timer_mqtt, 1000, true);
+    _mqtt_status = ENUM_MQTT_STATUS_INITIALIZED;
     LOGI("[ZLIB_MQTT]mqtt init %s:%d\n", host, port);
 }
 
@@ -231,17 +213,7 @@ void ICACHE_FLASH_ATTR zlib_mqtt_set_online_message(zlib_mqtt_message_info_t *p,
     _mqtt_online_message_num = count;
     _mqtt_online_message = p;
 }
-/**
- * 函  数  名: zlib_mqtt_reply
- * 函数说明: 回复mqtt请求
- * 参        数:  arg -- argument to set for client or server
- *         psend -- The send data
- * 返        回: 无
- */
-void ICACHE_FLASH_ATTR zlib_mqtt_reply(void *arg, char *psend)
-{
 
-}
 /**
  * 函  数  名: zlib_mqtt_is_connected
  * 函数说明: mqtt是否有连接
@@ -251,7 +223,7 @@ void ICACHE_FLASH_ATTR zlib_mqtt_reply(void *arg, char *psend)
  */
 bool ICACHE_FLASH_ATTR zlib_mqtt_is_connected(void)
 {
-    return _mqtt_is_connected;
+    return _mqtt_status == ENUM_MQTT_STATUS_CONNECTED;
 }
 /**
  * 函  数  名: zlib_mqtt_connect/zlib_mqtt_disconnect
@@ -261,6 +233,11 @@ bool ICACHE_FLASH_ATTR zlib_mqtt_is_connected(void)
  */
 void ICACHE_FLASH_ATTR zlib_mqtt_connect(void)
 {
+    if(_mqtt_status < ENUM_MQTT_STATUS_INITIALIZED)
+    {
+        LOGW("[ZLIB_MQTT]mqtt_connect error, mqtt uninitialized\n");
+        return;
+    }
     MQTT_Connect(&mqttClient);
 }
 void ICACHE_FLASH_ATTR zlib_mqtt_disconnect(void)
@@ -279,7 +256,7 @@ bool ICACHE_FLASH_ATTR zlib_mqtt_send_message(char *topic, char* message, int qo
     if(qos < 0)
         qos = 0;
     else if(qos > 2) qos = 2;
-    return zlib_mqtt_is_connected ? MQTT_Publish(&mqttClient, topic, message, os_strlen(message), qos, retain) : false;
+    return zlib_mqtt_is_connected() ? MQTT_Publish(&mqttClient, topic, message, os_strlen(message), qos, retain) : false;
 }
 
 /**
@@ -293,5 +270,5 @@ bool ICACHE_FLASH_ATTR zlib_mqtt_send_byte(char *topic, char* message, int data_
     if(qos < 0)
         qos = 0;
     else if(qos > 2) qos = 2;
-    return zlib_mqtt_is_connected ? MQTT_Publish(&mqttClient, topic, message, data_length, qos, retain) : false;
+    return zlib_mqtt_is_connected() ? MQTT_Publish(&mqttClient, topic, message, data_length, qos, retain) : false;
 }
