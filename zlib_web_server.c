@@ -493,7 +493,7 @@ int16_t ICACHE_FLASH_ATTR zlib_web_server_get_tag_val(char * pusrdata, char *tag
         }
         else
         {
-            if(*tag_p == *ptr)
+            if(*tag_p == *ptr || (*tag_p==' '&&*ptr=='+') )
             {
                 ptr++;
                 tag_p++;    //此字符正确 对比下一个字符
@@ -541,6 +541,12 @@ int16_t ICACHE_FLASH_ATTR zlib_web_server_get_tag_val(char * pusrdata, char *tag
             count++;
             ptr++;
             continue;
+        }
+        else if(*ptr == '+')
+        {
+            *(value + count) = ' ';
+            count++;
+            ptr++;
         }
         else
         {

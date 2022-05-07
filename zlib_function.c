@@ -44,11 +44,14 @@ void ICACHE_FLASH_ATTR zlib_fun_wifi_send(void *arg, Wifi_Comm_type_t type, char
     {
         case WIFI_COMM_TYPE_MQTT:
         {
-            if(topic == NULL)
-                zlib_mqtt_send_message("", s, qos, retain);
-            else
-                zlib_mqtt_send_message(topic, s, qos, retain);
-            break;
+            if(zlib_mqtt_is_connected())
+            {
+                if(topic == NULL)
+                    zlib_mqtt_send_message("", s, qos, retain);
+                else
+                    zlib_mqtt_send_message(topic, s, qos, retain);
+                break;
+            }
         }
         case WIFI_COMM_TYPE_UDP:
         {
